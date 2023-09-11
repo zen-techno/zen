@@ -7,7 +7,37 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
+fastapi = "^0.103.1"
+uvicorn = "^0.23.2"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.20"}
+alembic = "^1.12.0"
+pydantic-settings = "^2.0.3"
+asyncpg = "^0.28.0"
 
+[tool.black]
+line-length = 80
+target-version = ['py310']
+exclude = '''
+/(
+  | \.git
+  | \.mypy_cache
+  | \.venv
+  | alembic
+  | env
+  | venv
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+combine_as_imports = true
+line_length = 80
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+isort = "^5.12.0"
 
 [build-system]
 requires = ["poetry-core"]

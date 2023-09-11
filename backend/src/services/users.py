@@ -1,0 +1,34 @@
+from typing import List, Type
+from uuid import UUID
+
+from backend.src.core.repository import AbstractRepository
+from backend.src.schemas.users import (
+    UserCreateSchema,
+    UserReadSchema,
+    UserUpdateSchema,
+)
+
+
+class UserService:
+    def __init__(self, user_repository: Type[AbstractRepository]):
+        self.user_repository: AbstractRepository = user_repository()
+
+    async def create_user(self, *, user: UserCreateSchema) -> UserReadSchema:
+        user_dict = user.model_dump()
+        user = await self.user_repository.add_one(data=user_dict)
+        return user
+
+    async def get_all_users(self) -> List[UserReadSchema]:
+        return await self.user_repository.get_all()
+
+    async def get_user_by_uuid(self, *, id_: UUID) -> UserReadSchema:
+        return await self.user_repository.get_one(id=id_)
+
+    async def update_user_by_uuid(
+        self, *, id_: UUID, user: UserUpdateSchema
+    ) -> UserReadSchema:
+        user_dict = user.model_dump()
+        return await self.user_repository.update_one(id_=id_, data=user_dict)
+
+    async def delete_user(self, *, id_: UUID) -> None:
+        await self.user_repository.delete_one(id_=id_)
