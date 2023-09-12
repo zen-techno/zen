@@ -5,7 +5,9 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.src.models.base import Base
+from backend.src.schemas.categories import CategoryReadSchema
 from backend.src.schemas.expenses import ExpenseReadSchema
+from backend.src.schemas.users import UserReadSchema
 
 
 class Expense(Base):
@@ -38,6 +40,12 @@ class Expense(Base):
             name=self.name,
             amount=self.amount,
             transaction_date=self.transaction_date,
-            who_paid_id=self.who_paid_id,
-            category_id=self.category_id,
+            who_paid=UserReadSchema(
+                id=self.who_paid.id,
+                name=self.who_paid.name,
+                telegram_id=self.who_paid.telegram_id,
+            ),
+            category=CategoryReadSchema(
+                id=self.category.id, name=self.category.name
+            ),
         )

@@ -17,7 +17,6 @@ from backend.src.schemas.expenses import (
 )
 from backend.src.schemas.users import UserReadSchema
 
-
 # Users validations
 
 
