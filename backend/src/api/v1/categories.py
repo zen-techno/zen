@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 
 from backend.src.api.dependencies import (
     CategoryServiceDepends,
-    valid_category_uuid,
+    valid_category_id,
 )
 from backend.src.schemas.categories import (
     CategoryCreateSchema,
@@ -23,9 +23,9 @@ async def get_categories(
     return await category_service.get_all_categories()
 
 
-@router.get("/{uuid}", response_model=CategoryReadSchema)
-async def get_category_by_uuid(
-    valid_category: CategoryReadSchema = Depends(valid_category_uuid),
+@router.get("/{category_id}", response_model=CategoryReadSchema)
+def get_category_by_id(
+    valid_category: CategoryReadSchema = Depends(valid_category_id),
 ) -> CategoryReadSchema:
     return valid_category
 
@@ -38,24 +38,26 @@ async def add_category(
 
 
 @router.put(
-    "/{uuid}",
+    "/{category_id}",
     response_model=CategoryReadSchema,
-    dependencies=[Depends(valid_category_uuid)],
+    dependencies=[Depends(valid_category_id)],
 )
-async def update_category(
-    uuid: UUID,
+async def update_category_by_id(
+    category_id: UUID,
     category: CategoryUpdateSchema,
     category_service: CategoryServiceDepends,
 ) -> CategoryReadSchema:
-    return await category_service.update_category_by_uuid(
-        id_=uuid, category=category
+    return await category_service.update_category_by_id(
+        id=category_id, category=category
     )
 
 
 @router.delete(
-    "/{uuid}", response_model=None, dependencies=[Depends(valid_category_uuid)]
+    "/{category_id}",
+    response_model=None,
+    dependencies=[Depends(valid_category_id)],
 )
-async def remove_category_by_uuid(
-    uuid: UUID, category_service: CategoryServiceDepends
+async def remove_category_by_id(
+    category_id: UUID, category_service: CategoryServiceDepends
 ) -> None:
-    await category_service.delete_category(id_=uuid)
+    await category_service.delete_category_by_id(id=category_id)

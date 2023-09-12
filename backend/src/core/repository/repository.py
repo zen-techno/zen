@@ -23,9 +23,9 @@ class AbstractRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def update_one(self, *, id_: ID, data: DataDict) -> ReadSchema:
+    async def update_one(self, *, id: ID, data: DataDict) -> ReadSchema:
         raise NotImplementedError
 
     @abstractmethod
-    async def delete_one(self, *, id_: ID):
+    async def delete_one(self, *, id: ID) -> None:
         raise NotImplementedError

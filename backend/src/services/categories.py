@@ -23,16 +23,14 @@ class CategoryService:
     async def get_all_categories(self) -> List[CategoryReadSchema]:
         return await self.category_repository.get_all()
 
-    async def get_category_by_uuid(self, *, id_: UUID) -> CategoryReadSchema:
-        return await self.category_repository.get_one(id=id_)
+    async def get_category_by_id(self, *, id: UUID) -> CategoryReadSchema:
+        return await self.category_repository.get_one(id=id)
 
-    async def update_category_by_uuid(
-        self, *, id_: UUID, category: CategoryUpdateSchema
+    async def update_category_by_id(
+        self, *, id: UUID, category: CategoryUpdateSchema
     ) -> CategoryReadSchema:
         user_dict = category.model_dump()
-        return await self.category_repository.update_one(
-            id_=id_, data=user_dict
-        )
+        return await self.category_repository.update_one(id=id, data=user_dict)
 
-    async def delete_category(self, *, id_: UUID) -> None:
-        await self.category_repository.delete_one(id_=id_)
+    async def delete_category_by_id(self, *, id: UUID) -> None:
+        await self.category_repository.delete_one(id=id)

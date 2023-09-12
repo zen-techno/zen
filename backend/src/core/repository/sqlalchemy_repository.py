@@ -37,20 +37,20 @@ class SQLAlchemyRepository(AbstractRepository):
                 return result.to_read_model()
             return None
 
-    async def update_one(self, *, id_: ID, data: DataDict) -> ReadSchema:
+    async def update_one(self, *, id: ID, data: DataDict) -> ReadSchema:
         async with self.session_maker() as session:
             query = (
                 update(self.model)
                 .values(**data)
-                .filter_by(id=id_)
+                .filter_by(id=id)
                 .returning(self.model)
             )
             result = await session.execute(query)
             await session.commit()
             return result.scalar_one().to_read_model()
 
-    async def delete_one(self, *, id_: ID) -> None:
+    async def delete_one(self, *, id: ID) -> None:
         async with self.session_maker() as session:
-            query = delete(self.model).filter_by(id=id_)
+            query = delete(self.model).filter_by(id=id)
             await session.execute(query)
             await session.commit()

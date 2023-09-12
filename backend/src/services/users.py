@@ -21,14 +21,14 @@ class UserService:
     async def get_all_users(self) -> List[UserReadSchema]:
         return await self.user_repository.get_all()
 
-    async def get_user_by_uuid(self, *, id_: UUID) -> UserReadSchema:
-        return await self.user_repository.get_one(id=id_)
+    async def get_user_by_id(self, *, id: UUID) -> UserReadSchema:
+        return await self.user_repository.get_one(id=id)
 
-    async def update_user_by_uuid(
-        self, *, id_: UUID, user: UserUpdateSchema
+    async def update_user_by_id(
+        self, *, id: UUID, user: UserUpdateSchema
     ) -> UserReadSchema:
         user_dict = user.model_dump()
-        return await self.user_repository.update_one(id_=id_, data=user_dict)
+        return await self.user_repository.update_one(id=id, data=user_dict)
 
-    async def delete_user(self, *, id_: UUID) -> None:
-        await self.user_repository.delete_one(id_=id_)
+    async def delete_user_by_id(self, *, id: UUID) -> None:
+        await self.user_repository.delete_one(id=id)

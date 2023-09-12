@@ -8,7 +8,7 @@ router = APIRouter(prefix="/v1")
 
 
 registered_routers = [
-    # expenses_router,
+    expenses_router,
     categories_router,
     users_router,
 ]
