@@ -1,4 +1,4 @@
-from typing import TypeAlias, Union
+from typing import Union
 from uuid import UUID
 
 from fastapi import status

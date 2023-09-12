@@ -16,7 +16,7 @@ asyncpg = "^0.28.0"
 
 [tool.black]
 line-length = 80
-target-version = ['py310']
+target-version = ['py311']
 exclude = '''
 /(
   | \.git
@@ -25,6 +25,7 @@ exclude = '''
   | alembic
   | env
   | venv
+  | .ruff_cache
 )/
 '''
 
@@ -34,10 +35,50 @@ multi_line_output = 3
 combine_as_imports = true
 line_length = 80
 
+[tool.ruff]
+src = ["src"]
+select = ["E", "F" , "UP"]
+ignore = []
+fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+unfixable = []
+line-length = 80
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+ignore-init-module-imports = true
+target-version = "py311"
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "alembic",
+    "alembic.ini",
+    ".env"
+]
+
+[tool.ruff.mccabe]
+max-complexity = 10
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"
 isort = "^5.12.0"
+ruff = "^0.0.288"
 
 [build-system]
 requires = ["poetry-core"]
