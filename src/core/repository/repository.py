@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Any, TypeAlias
+from typing import Any, TypeAlias, Union
 from uuid import UUID
 
 from pydantic import BaseModel
 
-ID: TypeAlias = int | (UUID | str)
+ID: TypeAlias = Union[UUID, int, str]
 DataDict: TypeAlias = dict[str, Any]
 ReadSchema: TypeAlias = BaseModel | Any
 

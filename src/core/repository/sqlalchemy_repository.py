@@ -7,11 +7,10 @@ from src.core.repository.repository import (
     ReadSchema,
 )
 from src.database.database import async_session_maker
-from src.models import Base
 
 
 class SQLAlchemyRepository(AbstractRepository):
-    model: Base = None
+    model = None
     session_maker = async_session_maker
 
     async def add_one(self, *, data: DataDict) -> ReadSchema:

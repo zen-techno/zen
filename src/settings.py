@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import PostgresDsn, SecretStr
+from pydantic import SecretStr
 from pydantic.fields import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -16,7 +16,7 @@ class PostgreSQLSettings(BaseSettings):
     driver: str
 
     @property
-    def dsn(self) -> PostgresDsn:
+    def dsn(self) -> str:
         return (
             f"postgresql+{self.driver}://{self.user}:{self.password.get_secret_value()}"
             f"@{self.host}:{self.port}/{self.database_name}"
