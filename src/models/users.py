@@ -1,4 +1,3 @@
-from typing import List, Optional
 from uuid import UUID, uuid4
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -12,9 +11,9 @@ class User(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     name: Mapped[str] = mapped_column(nullable=False)
-    telegram_id: Mapped[Optional[int]]
+    telegram_id: Mapped[int | None]
 
-    expenses: Mapped[List["Expense"]] = relationship(back_populates="who_paid")
+    expenses: Mapped[list["Expense"]] = relationship(back_populates="who_paid")
 
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, name={self.name!r})"

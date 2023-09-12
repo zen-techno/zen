@@ -1,4 +1,3 @@
-from typing import List, Type
 from uuid import UUID
 
 from src.core.repository import AbstractRepository
@@ -10,7 +9,7 @@ from src.schemas.expenses import (
 
 
 class ExpenseService:
-    def __init__(self, expense_repository: Type[AbstractRepository]):
+    def __init__(self, expense_repository: type[AbstractRepository]):
         self.expense_repository: AbstractRepository = expense_repository()
 
     async def create_expense(
@@ -20,7 +19,7 @@ class ExpenseService:
         expense = await self.expense_repository.add_one(data=user_dict)
         return expense
 
-    async def get_all_expenses(self) -> List[ExpenseReadSchema]:
+    async def get_all_expenses(self) -> list[ExpenseReadSchema]:
         return await self.expense_repository.get_all()
 
     async def get_expense_by_id(self, *, id: UUID) -> ExpenseReadSchema:

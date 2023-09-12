@@ -1,4 +1,3 @@
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
@@ -18,11 +17,11 @@ router = APIRouter(prefix="/expenses", tags=["Expenses"])
 
 
 @router.get(
-    "", response_model=List[ExpenseReadSchema], status_code=status.HTTP_200_OK
+    "", response_model=list[ExpenseReadSchema], status_code=status.HTTP_200_OK
 )
 async def get_expenses(
     expense_service: ExpenseServiceDepends,
-) -> List[ExpenseReadSchema]:
+) -> list[ExpenseReadSchema]:
     return await expense_service.get_all_expenses()
 
 

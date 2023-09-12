@@ -1,4 +1,3 @@
-from typing import Union
 from uuid import UUID
 
 from fastapi import status
@@ -61,10 +60,10 @@ async def valid_expense_id(
 
 
 async def valid_expense_schema(
-    expense: Union[ExpenseCreateSchema, ExpenseUpdateSchema],
+    expense: ExpenseCreateSchema | ExpenseUpdateSchema,
     user_service: UserServiceDepends,
     category_service: CategoryServiceDepends,
-) -> Union[ExpenseCreateSchema, ExpenseUpdateSchema]:
+) -> ExpenseCreateSchema | ExpenseUpdateSchema:
     user_id = expense.who_paid_id
     user = await user_service.get_user_by_id(id=user_id)
     if user is None:

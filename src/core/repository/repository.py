@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, TypeAlias, Union
+from typing import Any, TypeAlias
 from uuid import UUID
 
 from pydantic import BaseModel
 
-ID: TypeAlias = Union[int, UUID, str]
-DataDict: TypeAlias = Dict[str, Any]
-ReadSchema: TypeAlias = Union[BaseModel, Any]
+ID: TypeAlias = int | (UUID | str)
+DataDict: TypeAlias = dict[str, Any]
+ReadSchema: TypeAlias = BaseModel | Any
 
 
 class AbstractRepository(ABC):
@@ -15,11 +15,11 @@ class AbstractRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_all(self) -> List[ReadSchema]:
+    async def get_all(self) -> list[ReadSchema]:
         raise NotImplementedError
 
     @abstractmethod
-    async def get_one(self, **filter_by) -> Optional[ReadSchema]:
+    async def get_one(self, **filter_by) -> ReadSchema | None:
         raise NotImplementedError
 
     @abstractmethod

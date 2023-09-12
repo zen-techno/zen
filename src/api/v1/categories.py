@@ -1,4 +1,3 @@
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
@@ -14,11 +13,11 @@ router = APIRouter(prefix="/categories", tags=["Categories"])
 
 
 @router.get(
-    "", response_model=List[CategoryReadSchema], status_code=status.HTTP_200_OK
+    "", response_model=list[CategoryReadSchema], status_code=status.HTTP_200_OK
 )
 async def get_categories(
     category_service: CategoryServiceDepends,
-) -> List[CategoryReadSchema]:
+) -> list[CategoryReadSchema]:
     return await category_service.get_all_categories()
 
 

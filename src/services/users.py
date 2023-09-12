@@ -1,4 +1,3 @@
-from typing import List, Type
 from uuid import UUID
 
 from src.core.repository import AbstractRepository
@@ -6,7 +5,7 @@ from src.schemas.users import UserCreateSchema, UserReadSchema, UserUpdateSchema
 
 
 class UserService:
-    def __init__(self, user_repository: Type[AbstractRepository]):
+    def __init__(self, user_repository: type[AbstractRepository]):
         self.user_repository: AbstractRepository = user_repository()
 
     async def create_user(self, *, user: UserCreateSchema) -> UserReadSchema:
@@ -14,7 +13,7 @@ class UserService:
         user = await self.user_repository.add_one(data=user_dict)
         return user
 
-    async def get_all_users(self) -> List[UserReadSchema]:
+    async def get_all_users(self) -> list[UserReadSchema]:
         return await self.user_repository.get_all()
 
     async def get_user_by_id(self, *, id: UUID) -> UserReadSchema:

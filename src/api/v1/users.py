@@ -1,4 +1,3 @@
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
@@ -10,9 +9,9 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.get(
-    "", response_model=List[UserReadSchema], status_code=status.HTTP_200_OK
+    "", response_model=list[UserReadSchema], status_code=status.HTTP_200_OK
 )
-async def get_users(user_service: UserServiceDepends) -> List[UserReadSchema]:
+async def get_users(user_service: UserServiceDepends) -> list[UserReadSchema]:
     return await user_service.get_all_users()
 
 

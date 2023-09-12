@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from sqlalchemy import delete, insert, select, update
 
 from src.core.repository.repository import (
@@ -23,13 +21,13 @@ class SQLAlchemyRepository(AbstractRepository):
             await session.commit()
             return result.scalar_one().to_read_model()
 
-    async def get_all(self) -> List[ReadSchema]:
+    async def get_all(self) -> list[ReadSchema]:
         async with self.session_maker() as session:
             query = select(self.model)
             result = await session.execute(query)
             return [item.to_read_model() for item in result.scalars()]
 
-    async def get_one(self, **filter_by) -> Optional[ReadSchema]:
+    async def get_one(self, **filter_by) -> ReadSchema | None:
         async with self.session_maker() as session:
             query = select(self.model).filter_by(**filter_by)
             result = await session.execute(query)
