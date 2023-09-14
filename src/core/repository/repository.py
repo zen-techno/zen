@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 ID: TypeAlias = Union[UUID, int, str]
 DataDict: TypeAlias = dict[str, Any]
-ReadSchema: TypeAlias = BaseModel | Any
+ReadSchema: TypeAlias = Union[BaseModel, Any]
 
 
 class AbstractRepository(ABC):
