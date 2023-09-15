@@ -10,7 +10,7 @@ from src.settings import settings
 
 engine = create_async_engine(url=settings.database.dsn, echo=False)
 async_session_maker = async_sessionmaker(
-    engine, class_=AsyncSession, expire_on_commit=False
+    bind=engine, class_=AsyncSession, expire_on_commit=False
 )
 
 

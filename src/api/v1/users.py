@@ -25,7 +25,7 @@ def get_user_by_id(
 
 
 @router.post(
-    "/", response_model=UserReadSchema, status_code=status.HTTP_201_CREATED
+    "", response_model=UserReadSchema, status_code=status.HTTP_201_CREATED
 )
 async def add_user(
     user: UserCreateSchema, user_service: UserServiceDepends
