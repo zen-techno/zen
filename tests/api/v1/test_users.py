@@ -40,7 +40,7 @@ class TestUserAPI:
         assert response.headers.get("content-type") == "application/json"
 
         body = response.json()
-        assert len(body) == 3, "Incorrect amount of fields"
+        assert len(body) == 3
         assert body.get("id") == "b781d250-c979-470e-b3aa-dbee25e681bd"
         assert body.get("name") == "Alice"
         assert body.get("telegram_id") == 1

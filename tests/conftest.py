@@ -1,5 +1,6 @@
 # ruff: noqa: F401
 
+from tests.fixtures.categories import create_categories
 from tests.fixtures.core import (
     aclient,
     check_database_mode,
