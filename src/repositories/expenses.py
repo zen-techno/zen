@@ -1,5 +1,5 @@
 from sqlalchemy import insert, select, update
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload
 
 from src.core.repository import SQLAlchemyRepository
 from src.core.repository.repository import ID, DataDict, ReadSchema
@@ -15,8 +15,8 @@ class ExpenseRepository(SQLAlchemyRepository):
                 insert(self.model)
                 .values(**data)
                 .returning(self.model)
-                .options(joinedload(self.model.who_paid))
-                .options(joinedload(self.model.category))
+                .options(selectinload(self.model.who_paid))
+                .options(selectinload(self.model.category))
             )
             result = await session.execute(query)
             await session.commit()
@@ -26,8 +26,8 @@ class ExpenseRepository(SQLAlchemyRepository):
         async with self.session_maker() as session:
             query = (
                 select(self.model)
-                .options(joinedload(self.model.who_paid))
-                .options(joinedload(self.model.category))
+                .options(selectinload(self.model.who_paid))
+                .options(selectinload(self.model.category))
             )
             result = await session.execute(query)
             return [item.to_read_model() for item in result.scalars()]
@@ -37,8 +37,8 @@ class ExpenseRepository(SQLAlchemyRepository):
             query = (
                 select(self.model)
                 .filter_by(**filter_by)
-                .options(joinedload(self.model.who_paid))
-                .options(joinedload(self.model.category))
+                .options(selectinload(self.model.who_paid))
+                .options(selectinload(self.model.category))
             )
             result = await session.execute(query)
             if result := result.scalar_one_or_none():
@@ -52,8 +52,8 @@ class ExpenseRepository(SQLAlchemyRepository):
                 .values(**data)
                 .filter_by(id=id)
                 .returning(self.model)
-                .options(joinedload(self.model.who_paid))
-                .options(joinedload(self.model.category))
+                .options(selectinload(self.model.who_paid))
+                .options(selectinload(self.model.category))
             )
             result = await session.execute(query)
             await session.commit()

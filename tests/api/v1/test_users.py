@@ -1,10 +1,14 @@
+from typing import Any
+
+import pytest
 from fastapi import status
 from fastapi.encoders import jsonable_encoder
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models import User
+from src.models import Expense, User
+from tests.fixtures.users import test_users
 
 
 class TestUserAPI:
@@ -16,7 +20,7 @@ class TestUserAPI:
         assert response.json() == []
 
     async def test_get_all_users(
-        self, aclient: AsyncClient, create_users: list[User]
+        self, aclient: AsyncClient, create_users_fixture: list[User]
     ) -> None:
         response = await aclient.get("api/v1/users")
 
@@ -26,115 +30,138 @@ class TestUserAPI:
         body = response.json()
         assert len(body) == 2
         assert body == jsonable_encoder(
-            [u.to_read_model() for u in create_users]
+            [u.to_read_model() for u in create_users_fixture]
         )
 
+    @pytest.mark.parametrize("user", test_users)
     async def test_get_one_user(
-        self, aclient: AsyncClient, create_users: list[User]
+        self,
+        user: dict[str, Any],
+        aclient: AsyncClient,
+        create_users_fixture: list[User],
     ) -> None:
-        response = await aclient.get(
-            "api/v1/users/b781d250-c979-470e-b3aa-dbee25e681bd"
-        )
+        user_uuid = str(user["id"])
+        response = await aclient.get(f"api/v1/users/{user_uuid}")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.headers.get("content-type") == "application/json"
 
         body = response.json()
         assert len(body) == 3
-        assert body.get("id") == "b781d250-c979-470e-b3aa-dbee25e681bd"
-        assert body.get("name") == "Alice"
-        assert body.get("telegram_id") == 1
+        assert body.get("id") == user_uuid
+        assert body.get("name") == user["name"]
+        assert body.get("telegram_id") == user["telegram_id"]
 
     async def test_user_not_found(
-        self, aclient: AsyncClient, create_users: list[User]
+        self, aclient: AsyncClient, create_users_fixture: list[User]
     ) -> None:
-        response = await aclient.get(
-            "api/v1/users/b781d250-ffff-ffff-ffff-dbee25e681bd"
-        )
+        user_uuid = "b781d250-ffff-ffff-ffff-dbee25e681bd"
+        response = await aclient.get(f"api/v1/users/{user_uuid}")
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.headers.get("content-type") == "application/json"
         assert response.json() == {"detail": "User is not found"}
 
+    @pytest.mark.parametrize("user", test_users)
     async def test_create_user(
-        self, aclient: AsyncClient, database_session: AsyncSession
+        self,
+        user: dict[str, Any],
+        aclient: AsyncClient,
+        database_session: AsyncSession,
     ) -> None:
         response = await aclient.post(
             "api/v1/users",
-            json={"name": "Robert", "telegram_id": 10},
+            json={"name": user["name"], "telegram_id": user["telegram_id"]},
         )
         assert response.status_code == status.HTTP_201_CREATED
         assert response.headers.get("content-type") == "application/json"
 
         body = response.json()
-        user_id = body.get("id")
-        user_name = body.get("name")
-        user_telegram_id = body.get("telegram_id")
-
         assert len(body) == 3
-        assert user_id
-        assert user_name == "Robert"
-        assert user_telegram_id == 10
 
-        query = select(User).filter_by(id=user_id)
+        created_user_id = body.get("id")
+        created_user_name = body.get("name")
+        created_user_telegram_id = body.get("telegram_id")
+
+        assert created_user_id
+        assert created_user_name == user["name"]
+        assert created_user_telegram_id == user["telegram_id"]
+
+        query = select(User).filter_by(id=created_user_id)
         result = await database_session.execute(query)
         result = result.scalar_one_or_none()
 
         assert result
-        assert user_id == str(result.id)
-        assert user_name == result.name
-        assert user_telegram_id == result.telegram_id
+        assert created_user_id == str(result.id)
+        assert created_user_name == result.name
+        assert created_user_telegram_id == result.telegram_id
 
+    @pytest.mark.parametrize("user", test_users)
     async def test_update_user(
         self,
+        user: dict[str, Any],
         aclient: AsyncClient,
-        create_users: list[User],
+        create_users_fixture: list[User],
         database_session: AsyncSession,
     ) -> None:
+        user_uuid = str(user["id"])
+        expected_name_update = "Al"
+        expected_telegram_id_update = 12
+
         response = await aclient.put(
-            "api/v1/users/b781d250-c979-470e-b3aa-dbee25e681bd",
-            json={"name": "Al", "telegram_id": 12},
+            f"api/v1/users/{user_uuid}",
+            json={
+                "name": expected_name_update,
+                "telegram_id": expected_telegram_id_update,
+            },
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.headers.get("content-type") == "application/json"
 
         body = response.json()
-        user_id = body.get("id")
-        user_name = body.get("name")
-        user_telegram_id = body.get("telegram_id")
-
         assert len(body) == 3
-        assert user_id == "b781d250-c979-470e-b3aa-dbee25e681bd"
-        assert user_name == "Al"
-        assert user_telegram_id == 12
+
+        updated_user_id = body.get("id")
+        updated_user_name = body.get("name")
+        updated_user_telegram_id = body.get("telegram_id")
+
+        assert updated_user_id == user_uuid
+        assert updated_user_name == expected_name_update
+        assert updated_user_telegram_id == expected_telegram_id_update
 
         query = (
             select(User)
-            .filter_by(id=user_id)
+            .filter_by(id=updated_user_id)
             .execution_options(populate_existing=True)
         )
         result = await database_session.execute(query)
         result = result.scalar_one_or_none()
 
         assert result
-        assert user_id == str(result.id)
-        assert user_name == result.name
-        assert user_telegram_id == result.telegram_id
+        assert updated_user_id == str(result.id)
+        assert updated_user_name == result.name
+        assert updated_user_telegram_id == result.telegram_id
 
+    @pytest.mark.parametrize("user", test_users)
     async def test_delete_user(
         self,
+        user: dict[str, Any],
         aclient: AsyncClient,
-        create_users: list[User],
+        create_expenses_fixture: list[Expense],
         database_session: AsyncSession,
     ) -> None:
+        user_uuid = str(user["id"])
         response = await aclient.delete(
-            "api/v1/users/b781d250-c979-470e-b3aa-dbee25e681bd",
+            f"api/v1/users/{user_uuid}",
         )
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-        query = select(User).filter_by(
-            id="b781d250-c979-470e-b3aa-dbee25e681bd"
-        )
+        query = select(User).filter_by(id=user_uuid)
         result = await database_session.execute(query)
         result = result.scalar_one_or_none()
 
         assert result is None
+
+        query = select(Expense).filter_by(who_paid_id=user_uuid)
+        result = await database_session.execute(query)
+        result = list(result.scalars().all())
+        assert not result

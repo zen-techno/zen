@@ -17,6 +17,7 @@ app = FastAPI(
     title="Zen",
     summary="REST API сервис для управления личными финансами",
     lifespan=lifespan,
+    debug=True,
 )
 
 app.include_router(router)
