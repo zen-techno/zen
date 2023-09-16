@@ -1,10 +1,10 @@
 import asyncio
+from typing import TYPE_CHECKING
 
 from fastapi.logger import logger
 from sqlalchemy import text
 
 from src.database.database import async_session_maker
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
