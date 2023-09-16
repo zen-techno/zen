@@ -19,7 +19,7 @@ class AbstractRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_one(self, **filter_by) -> ReadSchema | None:
+    async def get_one(self, **filter_by: Any) -> ReadSchema | None:
         raise NotImplementedError
 
     @abstractmethod

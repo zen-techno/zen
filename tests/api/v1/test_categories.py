@@ -16,7 +16,7 @@ class TestCategoryAPI:
         assert response.json() == []
 
     async def test_get_all_categories(
-        self, aclient: AsyncClient, create_categories_fixture
+        self, aclient: AsyncClient, create_categories_fixture: list[Category]
     ) -> None:
         response = await aclient.get("api/v1/categories")
 
@@ -30,7 +30,7 @@ class TestCategoryAPI:
         )
 
     async def test_get_one_category(
-        self, aclient: AsyncClient, create_categories_fixture
+        self, aclient: AsyncClient, create_categories_fixture: list[Category]
     ) -> None:
         response = await aclient.get(
             "api/v1/categories/7d9e924e-bf73-4389-9c84-146c7b1e7230"
@@ -45,7 +45,7 @@ class TestCategoryAPI:
         assert body.get("name") == "Coffee"
 
     async def test_category_not_found(
-        self, aclient: AsyncClient, create_categories_fixture
+        self, aclient: AsyncClient, create_categories_fixture: list[Category]
     ) -> None:
         response = await aclient.get(
             "api/v1/categories/b781d250-ffff-ffff-ffff-dbee25e681bd"
@@ -83,7 +83,7 @@ class TestCategoryAPI:
     async def test_update_category(
         self,
         aclient: AsyncClient,
-        create_categories_fixture,
+        create_categories_fixture: list[Category],
         database_session: AsyncSession,
     ) -> None:
         response = await aclient.put(
@@ -116,7 +116,7 @@ class TestCategoryAPI:
     async def test_delete_category(
         self,
         aclient: AsyncClient,
-        create_categories_fixture,
+        create_categories_fixture: list[Category],
         database_session: AsyncSession,
     ) -> None:
         response = await aclient.delete(

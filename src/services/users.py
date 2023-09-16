@@ -5,7 +5,7 @@ from src.schemas.users import UserCreateSchema, UserReadSchema, UserUpdateSchema
 
 
 class UserService:
-    def __init__(self, user_repository: type[AbstractRepository]):
+    def __init__(self, user_repository: type[AbstractRepository]) -> None:
         self.user_repository: AbstractRepository = user_repository()
 
     async def create_user(self, *, user: UserCreateSchema) -> UserReadSchema:

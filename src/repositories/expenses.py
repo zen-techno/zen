@@ -1,3 +1,5 @@
+from typing import Any
+
 from sqlalchemy import insert, select, update
 from sqlalchemy.orm import selectinload
 
@@ -32,7 +34,7 @@ class ExpenseRepository(SQLAlchemyRepository):
             result = await session.execute(query)
             return [item.to_read_model() for item in result.scalars()]
 
-    async def get_one(self, **filter_by) -> ReadSchema | None:
+    async def get_one(self, **filter_by: Any) -> ReadSchema | None:
         async with self.session_maker() as session:
             query = (
                 select(self.model)

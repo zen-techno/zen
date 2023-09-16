@@ -1,10 +1,9 @@
-from datetime import datetime
+
 
 from fastapi import status
 from fastapi.encoders import jsonable_encoder
 from httpx import AsyncClient
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+
 
 from src.models import Expense
 
@@ -18,7 +17,7 @@ class TestExpenseAPI:
         assert response.json() == []
 
     async def test_get_all_expenses(
-        self, aclient: AsyncClient, create_expenses_fixture
+        self, aclient: AsyncClient, create_expenses_fixture: list[Expense]
     ) -> None:
         response = await aclient.get("api/v1/expenses")
 
@@ -32,7 +31,7 @@ class TestExpenseAPI:
         )
 
     async def test_expense_not_found(
-        self, aclient: AsyncClient, create_expenses_fixture
+        self, aclient: AsyncClient, create_expenses_fixture: list[Expense]
     ) -> None:
         response = await aclient.get(
             "api/v1/expenses/b781d250-ffff-ffff-ffff-dbee25e681bd"

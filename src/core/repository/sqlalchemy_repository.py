@@ -1,3 +1,5 @@
+from typing import Any
+
 from sqlalchemy import delete, insert, select, update
 
 from src.core.repository.repository import (
@@ -26,7 +28,7 @@ class SQLAlchemyRepository(AbstractRepository):
             result = await session.execute(query)
             return [item.to_read_model() for item in result.scalars()]
 
-    async def get_one(self, **filter_by) -> ReadSchema | None:
+    async def get_one(self, **filter_by: Any) -> ReadSchema | None:
         async with self.session_maker() as session:
             query = select(self.model).filter_by(**filter_by)
             result = await session.execute(query)

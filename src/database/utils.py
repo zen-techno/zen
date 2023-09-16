@@ -2,9 +2,12 @@ import asyncio
 
 from fastapi.logger import logger
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.database import async_session_maker
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def check_database_connection() -> None:

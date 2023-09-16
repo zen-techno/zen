@@ -50,9 +50,9 @@ line_length = 80
 
 [tool.ruff]
 src = ["src", "tests"]
-select = ["E", "F" , "UP", "ANN"]
-ignore = ["F821", "UP007"]
-fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+select = ["E", "ISC", "F", "UP", "ANN", "ASYNC", "TCH", "RUF"]
+ignore = ["F821", "UP007", "ANN101", "ANN401"]
+fixable = ["E", "ISC", "F", "UP", "ANN", "ASYNC", "TCH", "RUF"]
 unfixable = []
 line-length = 80
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"

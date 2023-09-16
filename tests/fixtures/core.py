@@ -31,7 +31,9 @@ async def check_database_mode() -> AsyncGenerator[None, None]:
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def prepare_database(check_database_mode) -> AsyncGenerator[None, None]:
+async def prepare_database(
+    check_database_mode: AsyncGenerator[None, None]
+) -> AsyncGenerator[None, None]:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
