@@ -10,25 +10,28 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models import Expense, User
 from tests.fixtures.users import test_users
 
+API_PATH = "api/v1"
+
 
 class TestUserAPI:
     async def test_get_all_users_empty(self, aclient: AsyncClient) -> None:
-        response = await aclient.get("api/v1/users")
+        response = await aclient.get(f"{API_PATH}/users")
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.headers.get("content-type") == "application/json"
+        assert response.headers["content-type"] == "application/json"
         assert response.json() == []
 
     async def test_get_all_users(
         self, aclient: AsyncClient, create_users_fixture: list[User]
     ) -> None:
-        response = await aclient.get("api/v1/users")
+        response = await aclient.get(f"{API_PATH}/users")
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.headers.get("content-type") == "application/json"
+        assert response.headers["content-type"] == "application/json"
 
         body = response.json()
         assert len(body) == 2
+
         assert body == jsonable_encoder(
             [u.to_read_model() for u in create_users_fixture]
         )
@@ -41,24 +44,25 @@ class TestUserAPI:
         create_users_fixture: list[User],
     ) -> None:
         user_uuid = str(user["id"])
-        response = await aclient.get(f"api/v1/users/{user_uuid}")
+        response = await aclient.get(f"{API_PATH}/users/{user_uuid}")
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.headers.get("content-type") == "application/json"
+        assert response.headers["content-type"] == "application/json"
 
         body = response.json()
         assert len(body) == 3
-        assert body.get("id") == user_uuid
-        assert body.get("name") == user["name"]
-        assert body.get("telegram_id") == user["telegram_id"]
+
+        assert body["id"] == user_uuid
+        assert body["name"] == user["name"]
+        assert body["telegram_id"] == user["telegram_id"]
 
     async def test_user_not_found(
         self, aclient: AsyncClient, create_users_fixture: list[User]
     ) -> None:
         user_uuid = "b781d250-ffff-ffff-ffff-dbee25e681bd"
-        response = await aclient.get(f"api/v1/users/{user_uuid}")
+        response = await aclient.get(f"{API_PATH}/users/{user_uuid}")
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.headers.get("content-type") == "application/json"
+        assert response.headers["content-type"] == "application/json"
         assert response.json() == {"detail": "User is not found"}
 
     @pytest.mark.parametrize("user", test_users)
@@ -69,18 +73,18 @@ class TestUserAPI:
         database_session: AsyncSession,
     ) -> None:
         response = await aclient.post(
-            "api/v1/users",
+            f"{API_PATH}/users",
             json={"name": user["name"], "telegram_id": user["telegram_id"]},
         )
         assert response.status_code == status.HTTP_201_CREATED
-        assert response.headers.get("content-type") == "application/json"
+        assert response.headers["content-type"] == "application/json"
 
         body = response.json()
         assert len(body) == 3
 
-        created_user_id = body.get("id")
-        created_user_name = body.get("name")
-        created_user_telegram_id = body.get("telegram_id")
+        created_user_id = body["id"]
+        created_user_name = body["name"]
+        created_user_telegram_id = body["telegram_id"]
 
         assert created_user_id
         assert created_user_name == user["name"]
@@ -108,21 +112,21 @@ class TestUserAPI:
         expected_telegram_id_update = 12
 
         response = await aclient.put(
-            f"api/v1/users/{user_uuid}",
+            f"{API_PATH}/users/{user_uuid}",
             json={
                 "name": expected_name_update,
                 "telegram_id": expected_telegram_id_update,
             },
         )
         assert response.status_code == status.HTTP_200_OK
-        assert response.headers.get("content-type") == "application/json"
+        assert response.headers["content-type"] == "application/json"
 
         body = response.json()
         assert len(body) == 3
 
-        updated_user_id = body.get("id")
-        updated_user_name = body.get("name")
-        updated_user_telegram_id = body.get("telegram_id")
+        updated_user_id = body["id"]
+        updated_user_name = body["name"]
+        updated_user_telegram_id = body["telegram_id"]
 
         assert updated_user_id == user_uuid
         assert updated_user_name == expected_name_update
@@ -151,7 +155,7 @@ class TestUserAPI:
     ) -> None:
         user_uuid = str(user["id"])
         response = await aclient.delete(
-            f"api/v1/users/{user_uuid}",
+            f"{API_PATH}/users/{user_uuid}",
         )
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
@@ -164,4 +168,5 @@ class TestUserAPI:
         query = select(Expense).filter_by(who_paid_id=user_uuid)
         result = await database_session.execute(query)
         result = list(result.scalars().all())
+
         assert not result

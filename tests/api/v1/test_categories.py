@@ -10,22 +10,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models import Category
 from tests.fixtures.categories import test_categories
 
+API_PATH = "api/v1"
+
 
 class TestCategoryAPI:
     async def test_get_all_categories_empty(self, aclient: AsyncClient) -> None:
-        response = await aclient.get("api/v1/categories")
+        response = await aclient.get(f"{API_PATH}/categories")
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.headers.get("content-type") == "application/json"
+        assert response.headers["content-type"] == "application/json"
         assert response.json() == []
 
     async def test_get_all_categories(
         self, aclient: AsyncClient, create_categories_fixture: list[Category]
     ) -> None:
-        response = await aclient.get("api/v1/categories")
+        response = await aclient.get(f"{API_PATH}/categories")
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.headers.get("content-type") == "application/json"
+        assert response.headers["content-type"] == "application/json"
 
         body = response.json()
         assert len(body) == 2
@@ -41,23 +43,24 @@ class TestCategoryAPI:
         create_categories_fixture: list[Category],
     ) -> None:
         category_uuid = str(category["id"])
-        response = await aclient.get(f"api/v1/categories/{category_uuid}")
+        response = await aclient.get(f"{API_PATH}/categories/{category_uuid}")
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.headers.get("content-type") == "application/json"
+        assert response.headers["content-type"] == "application/json"
 
         body = response.json()
         assert len(body) == 2
-        assert body.get("id") == category_uuid
-        assert body.get("name") == category["name"]
+
+        assert body["id"] == category_uuid
+        assert body["name"] == category["name"]
 
     async def test_category_not_found(
         self, aclient: AsyncClient, create_categories_fixture: list[Category]
     ) -> None:
         category_uuid = "b781d250-ffff-ffff-ffff-dbee25e681bd"
-        response = await aclient.get(f"api/v1/categories/{category_uuid}")
+        response = await aclient.get(f"{API_PATH}/categories/{category_uuid}")
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.headers.get("content-type") == "application/json"
+        assert response.headers["content-type"] == "application/json"
         assert response.json() == {"detail": "Category is not found"}
 
     @pytest.mark.parametrize("category", test_categories)
@@ -68,17 +71,17 @@ class TestCategoryAPI:
         database_session: AsyncSession,
     ) -> None:
         response = await aclient.post(
-            "api/v1/categories",
+            f"{API_PATH}/categories",
             json={"name": category["name"]},
         )
         assert response.status_code == status.HTTP_201_CREATED
-        assert response.headers.get("content-type") == "application/json"
+        assert response.headers["content-type"] == "application/json"
 
         body = response.json()
         assert len(body) == 2
 
-        created_category_id = body.get("id")
-        created_category_name = body.get("name")
+        created_category_id = body["id"]
+        created_category_name = body["name"]
 
         assert created_category_id
         assert created_category_name == category["name"]
@@ -103,17 +106,17 @@ class TestCategoryAPI:
         expected_name_update = "Dinner"
 
         response = await aclient.put(
-            f"api/v1/categories/{category_uuid}",
+            f"{API_PATH}/categories/{category_uuid}",
             json={"name": expected_name_update},
         )
         assert response.status_code == status.HTTP_200_OK
-        assert response.headers.get("content-type") == "application/json"
+        assert response.headers["content-type"] == "application/json"
 
         body = response.json()
         assert len(body) == 2
 
-        updated_category_id = body.get("id")
-        updated_category_name = body.get("name")
+        updated_category_id = body["id"]
+        updated_category_name = body["name"]
 
         assert updated_category_id == category_uuid
         assert updated_category_name == expected_name_update
@@ -140,7 +143,7 @@ class TestCategoryAPI:
     ) -> None:
         category_uuid = str(category["id"])
         response = await aclient.delete(
-            f"api/v1/categories/{category_uuid}",
+            f"{API_PATH}/categories/{category_uuid}",
         )
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
