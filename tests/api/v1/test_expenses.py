@@ -189,7 +189,7 @@ class TestExpenseAPI:
         expense: dict[str, Any],
         aclient: AsyncClient,
         create_expenses_fixture: list[Expense],
-        database_session: AsyncSession
+        database_session: AsyncSession,
     ) -> None:
         expense_uuid = str(expense["id"])
         response = await aclient.delete(
