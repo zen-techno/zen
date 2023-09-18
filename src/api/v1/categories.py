@@ -33,11 +33,11 @@ def get_category_by_id(
 
 
 @router.post(
-    "/", response_model=CategoryReadSchema, status_code=status.HTTP_201_CREATED
+    "", response_model=CategoryReadSchema, status_code=status.HTTP_201_CREATED
 )
 async def add_category(
     category: CategoryCreateSchema, category_service: CategoryServiceDepends
-):
+) -> CategoryReadSchema:
     return await category_service.create_category(category=category)
 
 

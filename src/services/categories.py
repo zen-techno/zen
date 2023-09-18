@@ -9,7 +9,7 @@ from src.schemas.categories import (
 
 
 class CategoryService:
-    def __init__(self, category_repository: type[AbstractRepository]):
+    def __init__(self, category_repository: type[AbstractRepository]) -> None:
         self.category_repository: AbstractRepository = category_repository()
 
     async def create_category(

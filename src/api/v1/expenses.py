@@ -37,7 +37,7 @@ def get_expense_by_id(
 
 
 @router.post(
-    "/", response_model=ExpenseReadSchema, status_code=status.HTTP_201_CREATED
+    "", response_model=ExpenseReadSchema, status_code=status.HTTP_201_CREATED
 )
 async def add_expense(
     expense_service: ExpenseServiceDepends,

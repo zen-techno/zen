@@ -8,6 +8,7 @@ ENV_PATH = Path(__file__).parent.parent.resolve() / ".env"
 
 
 class PostgreSQLSettings(BaseSettings):
+    mode: str
     database_name: str
     user: str
     password: SecretStr

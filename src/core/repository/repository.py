@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 ID: TypeAlias = Union[UUID, int, str]
 DataDict: TypeAlias = dict[str, Any]
-ReadSchema: TypeAlias = BaseModel | Any
+ReadSchema: TypeAlias = Union[BaseModel, Any]
 
 
 class AbstractRepository(ABC):
@@ -19,7 +19,7 @@ class AbstractRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_one(self, **filter_by) -> ReadSchema | None:
+    async def get_one(self, **filter_by: Any) -> ReadSchema | None:
         raise NotImplementedError
 
     @abstractmethod

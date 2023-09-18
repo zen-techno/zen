@@ -5,7 +5,8 @@ description = ""
 authors = ["Rusih100 <rusih100@gmail.com>"]
 readme = "README.md"
 
-[tool.poetry.dependencies]
+
+[tool.poetry.dependencies] # Dependencies
 python = "^3.11"
 fastapi = "^0.103.1"
 uvicorn = "^0.23.2"
@@ -14,7 +15,18 @@ alembic = "^1.12.0"
 pydantic-settings = "^2.0.3"
 asyncpg = "^0.28.0"
 
-[tool.black]
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+isort = "^5.12.0"
+ruff = "^0.0.288"
+pytest = "^7.4.2"
+pytest-asyncio = "^0.21.1"
+pytest-dotenv = "^0.5.2"
+httpx = "^0.25.0"
+pytest-cov = "^4.1.0"
+
+
+[tool.black] # Tools
 line-length = 80
 target-version = ['py311']
 exclude = '''
@@ -26,6 +38,7 @@ exclude = '''
   | env
   | venv
   | .ruff_cache
+  | .pytest_cache
 )/
 '''
 
@@ -36,10 +49,10 @@ combine_as_imports = true
 line_length = 80
 
 [tool.ruff]
-src = ["src"]
-select = ["E", "F" , "UP"]
-ignore = ["F821", "UP007", "F401"]
-fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+src = ["src", "tests"]
+select = ["E", "ISC", "F", "UP", "ANN", "ASYNC", "TCH", "RUF"]
+ignore = ["F821", "UP007", "ANN101", "ANN401"]
+fixable = ["E", "ISC", "F", "UP", "ANN", "ASYNC", "TCH", "RUF"]
 unfixable = []
 line-length = 80
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
@@ -69,17 +82,23 @@ exclude = [
     "venv",
     "alembic",
     "alembic.ini",
-    ".env"
+    ".env",
+    ".test.env",
+    ".pytest_cache"
 ]
 
 [tool.ruff.mccabe]
 max-complexity = 10
 
+[tool.pytest.ini_options]
+pythonpath = [
+    ".", "src"
+]
+asyncio_mode = "auto"
+env_files = [
+    ".test.env"
+]
 
-[tool.poetry.group.dev.dependencies]
-black = "^23.7.0"
-isort = "^5.12.0"
-ruff = "^0.0.288"
 
 [build-system]
 requires = ["poetry-core"]

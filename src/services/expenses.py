@@ -9,7 +9,7 @@ from src.schemas.expenses import (
 
 
 class ExpenseService:
-    def __init__(self, expense_repository: type[AbstractRepository]):
+    def __init__(self, expense_repository: type[AbstractRepository]) -> None:
         self.expense_repository: AbstractRepository = expense_repository()
 
     async def create_expense(
