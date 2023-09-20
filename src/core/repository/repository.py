@@ -11,15 +11,15 @@ ReadSchema: TypeAlias = Union[BaseModel, Any]
 
 class AbstractRepository(ABC):
     @abstractmethod
-    async def add_one(self, *, data: DataDict) -> ReadSchema:
-        raise NotImplementedError
-
-    @abstractmethod
     async def get_all(self) -> list[ReadSchema]:
         raise NotImplementedError
 
     @abstractmethod
     async def get_one(self, **filter_by: Any) -> ReadSchema | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def add_one(self, *, data: DataDict) -> ReadSchema:
         raise NotImplementedError
 
     @abstractmethod

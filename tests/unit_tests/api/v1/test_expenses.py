@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 from fastapi import status
 from fastapi.encoders import jsonable_encoder
-from fixtures.expenses import test_expenses
+from fixtures.models import test_expenses
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,7 +30,7 @@ class TestExpenseAPI:
         assert response.headers["content-type"] == "application/json"
 
         body = response.json()
-        assert len(body) == 2
+        assert len(body) == len(create_expenses_fixture)
 
         assert body == jsonable_encoder(
             [e.to_read_model() for e in create_expenses_fixture]

@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID
 
 import pytest
@@ -6,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models import User
 
-test_users = [
+test_users: list[dict[str, Any]] = [
     {
         "id": UUID("b781d250c979470eb3aadbee25e681bd"),
         "name": "Alice",

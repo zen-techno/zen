@@ -15,13 +15,6 @@ class SQLAlchemyRepository(AbstractRepository):
     model = None
     session_maker = async_session_maker
 
-    async def add_one(self, *, data: DataDict) -> ReadSchema:
-        async with self.session_maker() as session:
-            query = insert(self.model).values(**data).returning(self.model)
-            result = await session.execute(query)
-            await session.commit()
-            return result.scalar_one().to_read_model()
-
     async def get_all(self) -> list[ReadSchema]:
         async with self.session_maker() as session:
             query = select(self.model)
@@ -36,6 +29,15 @@ class SQLAlchemyRepository(AbstractRepository):
                 return result.to_read_model()
             return None
 
+    # TODO: try ... except ...
+    async def add_one(self, *, data: DataDict) -> ReadSchema:
+        async with self.session_maker() as session:
+            query = insert(self.model).values(**data).returning(self.model)
+            result = await session.execute(query)
+            await session.commit()
+            return result.scalar_one().to_read_model()
+
+    # TODO: try ... except ...
     async def update_one(self, *, id: ID, data: DataDict) -> ReadSchema:
         async with self.session_maker() as session:
             query = (
@@ -48,6 +50,7 @@ class SQLAlchemyRepository(AbstractRepository):
             await session.commit()
             return result.scalar_one().to_read_model()
 
+    # TODO: Проверка на существование
     async def delete_one(self, *, id: ID) -> None:
         async with self.session_maker() as session:
             query = delete(self.model).filter_by(id=id)

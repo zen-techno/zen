@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models import Expense, User
-from tests.fixtures.users import test_users
+from tests.fixtures.models import test_users
 
 API_PATH = "api/v1"
 
@@ -30,7 +30,7 @@ class TestUserAPI:
         assert response.headers["content-type"] == "application/json"
 
         body = response.json()
-        assert len(body) == 2
+        assert len(body) == len(create_users_fixture)
 
         assert body == jsonable_encoder(
             [u.to_read_model() for u in create_users_fixture]

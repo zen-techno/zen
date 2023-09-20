@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models import Category
-from tests.fixtures.categories import test_categories
+from tests.fixtures.models import test_categories
 
 API_PATH = "api/v1"
 
@@ -30,7 +30,7 @@ class TestCategoryAPI:
         assert response.headers["content-type"] == "application/json"
 
         body = response.json()
-        assert len(body) == 2
+        assert len(body) == len(create_categories_fixture)
         assert body == jsonable_encoder(
             [c.to_read_model() for c in create_categories_fixture]
         )
@@ -59,6 +59,7 @@ class TestCategoryAPI:
     ) -> None:
         category_uuid = "b781d250-ffff-ffff-ffff-dbee25e681bd"
         response = await aclient.get(f"{API_PATH}/categories/{category_uuid}")
+
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.headers["content-type"] == "application/json"
         assert response.json() == {"detail": "Category is not found"}
@@ -74,6 +75,7 @@ class TestCategoryAPI:
             f"{API_PATH}/categories",
             json={"name": category["name"]},
         )
+
         assert response.status_code == status.HTTP_201_CREATED
         assert response.headers["content-type"] == "application/json"
 

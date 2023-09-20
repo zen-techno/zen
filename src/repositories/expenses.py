@@ -11,19 +11,6 @@ from src.models import Expense
 class ExpenseRepository(SQLAlchemyRepository):
     model = Expense
 
-    async def add_one(self, *, data: DataDict) -> ReadSchema:
-        async with self.session_maker() as session:
-            query = (
-                insert(self.model)
-                .values(**data)
-                .returning(self.model)
-                .options(selectinload(self.model.who_paid))
-                .options(selectinload(self.model.category))
-            )
-            result = await session.execute(query)
-            await session.commit()
-            return result.scalar_one().to_read_model()
-
     async def get_all(self) -> list[ReadSchema]:
         async with self.session_maker() as session:
             query = (
@@ -46,6 +33,19 @@ class ExpenseRepository(SQLAlchemyRepository):
             if result := result.scalar_one_or_none():
                 return result.to_read_model()
             return None
+
+    async def add_one(self, *, data: DataDict) -> ReadSchema:
+        async with self.session_maker() as session:
+            query = (
+                insert(self.model)
+                .values(**data)
+                .returning(self.model)
+                .options(selectinload(self.model.who_paid))
+                .options(selectinload(self.model.category))
+            )
+            result = await session.execute(query)
+            await session.commit()
+            return result.scalar_one().to_read_model()
 
     async def update_one(self, *, id: ID, data: DataDict) -> ReadSchema:
         async with self.session_maker() as session:

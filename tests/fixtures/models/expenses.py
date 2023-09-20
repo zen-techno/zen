@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 import pytest
@@ -8,7 +9,7 @@ from sqlalchemy.orm import selectinload
 
 from src.models import Category, Expense, User
 
-test_expenses = [
+test_expenses: list[dict[str, Any]] = [
     {
         "id": UUID("7c1d7bf1-3977-4fae-a42d-c8504410b721"),
         "name": "Cafe near the sea",
