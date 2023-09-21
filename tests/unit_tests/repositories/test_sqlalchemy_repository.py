@@ -1,11 +1,11 @@
 from typing import Any
 
 import pytest
-from fixtures.database.database_metadata import Entity, EntityReadSchema
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.repository import SQLAlchemyRepository
+from tests.fixtures.database.database_metadata import Entity, EntityReadSchema
 from tests.fixtures.models import test_entities
 
 

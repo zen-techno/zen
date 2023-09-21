@@ -1,11 +1,11 @@
 from collections.abc import AsyncGenerator
 
 import pytest
-from fixtures.database.database_metadata import TestBase
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import async_session_maker, engine
 from src.settings import settings
+from tests.fixtures.database.database_metadata import TestBase
 
 
 @pytest.fixture()
@@ -15,16 +15,18 @@ async def database_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 @pytest.fixture(scope="session")
-async def check_database_mode() -> AsyncGenerator[None, None]:
-    assert settings.database.mode == "test" and (
+def _check_database_mode() -> None:
+    assert (
         "test" in settings.database.database_name
     ), "Invalid .env file. You need to create .test.env"
-    yield
+    assert (
+        settings.database.mode == "test"
+    ), "Invalid .env file. You need to create .test.env"
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def prepare_database(
-    check_database_mode: AsyncGenerator[None, None]
+async def _prepare_database(
+    _check_database_mode: None,
 ) -> AsyncGenerator[None, None]:
     async with engine.begin() as conn:
         await conn.run_sync(TestBase.metadata.create_all)
@@ -33,8 +35,8 @@ async def prepare_database(
         await conn.run_sync(TestBase.metadata.drop_all)
 
 
-@pytest.fixture(autouse=True, scope="function")
-async def clear_database_tables(
+@pytest.fixture(autouse=True)
+async def _clear_database_tables(
     database_session: AsyncSession,
 ) -> AsyncGenerator[None, AsyncSession]:
     yield

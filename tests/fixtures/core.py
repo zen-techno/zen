@@ -16,7 +16,7 @@ def event_loop() -> Generator[AbstractEventLoop, None, None]:
     loop.close()
 
 
-@pytest.fixture
+@pytest.fixture()
 def client() -> TestClient:
     return TestClient(app)
 

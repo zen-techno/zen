@@ -3,12 +3,12 @@ from typing import Any
 import pytest
 from fastapi import status
 from fastapi.encoders import jsonable_encoder
-from fixtures.models import test_expenses
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models import Category, Expense, User
+from tests.fixtures.models import test_expenses
 
 API_PATH = "api/v1"
 

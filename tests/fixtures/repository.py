@@ -1,7 +1,7 @@
 import pytest
-from fixtures.database.database_metadata import Entity
 
 from src.core.repository import SQLAlchemyRepository
+from tests.fixtures.database.database_metadata import Entity
 
 
 @pytest.fixture()

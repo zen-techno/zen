@@ -2,10 +2,10 @@
 
 from tests.fixtures.core import aclient, client, event_loop
 from tests.fixtures.database.fixtures import (
-    check_database_mode,
-    clear_database_tables,
+    _check_database_mode,
+    _clear_database_tables,
+    _prepare_database,
     database_session,
-    prepare_database,
 )
 from tests.fixtures.models import (
     create_categories_fixture,
