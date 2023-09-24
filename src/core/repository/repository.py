@@ -5,25 +5,25 @@ from uuid import UUID
 from pydantic import BaseModel
 
 ID: TypeAlias = Union[UUID, int, str]
-DataDict: TypeAlias = dict[str, Any]
-ReadSchema: TypeAlias = Union[BaseModel, Any]
+EntityDict: TypeAlias = dict[str, Any]
+EntityReadSchema: TypeAlias = Union[BaseModel, Any]
 
 
 class AbstractRepository(ABC):
     @abstractmethod
-    async def get_all(self) -> list[ReadSchema]:
+    async def get_all(self) -> list[EntityReadSchema]:
         raise NotImplementedError
 
     @abstractmethod
-    async def get_one(self, **filter_by: Any) -> ReadSchema | None:
+    async def get_one(self, **filter_by: Any) -> EntityReadSchema | None:
         raise NotImplementedError
 
     @abstractmethod
-    async def add_one(self, *, data: DataDict) -> ReadSchema:
+    async def add_one(self, *, data: EntityDict) -> EntityReadSchema:
         raise NotImplementedError
 
     @abstractmethod
-    async def update_one(self, *, id: ID, data: DataDict) -> ReadSchema:
+    async def update_one(self, *, id: ID, data: EntityDict) -> EntityReadSchema:
         raise NotImplementedError
 
     @abstractmethod

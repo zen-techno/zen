@@ -2,9 +2,10 @@ from typing import Any
 from uuid import UUID
 
 import pytest
-from fixtures.database.database_metadata import Entity
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from tests.fixtures.database.database_metadata import Entity
 
 test_entities: list[dict[str, Any]] = [
     {
