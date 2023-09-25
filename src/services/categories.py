@@ -36,8 +36,9 @@ class CategoryService:
     ) -> CategoryReadSchema:
         try:
             async with uow:
-                category = await uow.categories.get_one(id=id)
+                category: CategoryReadSchema = await uow.categories.get_one(id=id)
                 if category is None:
+                    await uow.rollback()
                     raise CategoryServiceNotFoundError
                 return category
 

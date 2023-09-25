@@ -30,8 +30,9 @@ class UserService:
     ) -> UserReadSchema:
         try:
             async with uow:
-                user = await uow.users.get_one(id=id)
+                user: UserReadSchema = await uow.users.get_one(id=id)
                 if user is None:
+                    await uow.rollback()
                     raise UserServiceNotFoundError
                 return user
 
