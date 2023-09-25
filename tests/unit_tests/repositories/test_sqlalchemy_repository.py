@@ -98,6 +98,7 @@ class TestSQLAlchemyRepository:
         self,
         repository: SQLAlchemyRepository,
     ) -> None:
+        # raise NotImplementedError
         ...
 
     @pytest.mark.parametrize("entity", test_entities)
@@ -134,6 +135,14 @@ class TestSQLAlchemyRepository:
         self,
         repository: SQLAlchemyRepository,
     ) -> None:
+        # raise NotImplementedError
+        ...
+
+    async def test_update_not_found(
+        self,
+        repository: SQLAlchemyRepository,
+    ) -> None:
+        # raise NotImplementedError
         ...
 
     @pytest.mark.parametrize("entity", test_entities)
@@ -142,7 +151,7 @@ class TestSQLAlchemyRepository:
         entity: dict[str, Any],
         repository: SQLAlchemyRepository,
         database_session: AsyncSession,
-        create_users_fixture: list[Entity],
+        create_entities_fixture: list[Entity],
     ) -> None:
         await repository.delete_one(id=entity["id"])
 
@@ -152,3 +161,10 @@ class TestSQLAlchemyRepository:
         result = result.scalar_one_or_none()
 
         assert result is None
+
+    async def test_delete_not_found(
+        self,
+        repository: SQLAlchemyRepository,
+    ) -> None:
+        # raise NotImplementedError
+        ...
