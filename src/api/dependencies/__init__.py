@@ -1,14 +1,4 @@
 # ruff: noqa: F401
 
 from src.api.dependencies.database import Session
-from src.api.dependencies.services import (
-    CategoryServiceDepends,
-    ExpenseServiceDepends,
-    UserServiceDepends,
-)
-from src.api.dependencies.validation import (
-    valid_category_id,
-    valid_expense_id,
-    valid_expense_schema,
-    valid_user_id,
-)
+from src.api.dependencies.unit_of_work import UnitOfWorkDepends

@@ -1,6 +1,5 @@
 from uuid import UUID
 
-from src.core.repository import AbstractRepository
 from src.schemas.expenses import (
     ExpenseCreateSchema,
     ExpenseReadSchema,
@@ -9,8 +8,11 @@ from src.schemas.expenses import (
 
 
 class ExpenseService:
-    def __init__(self, expense_repository: type[AbstractRepository]) -> None:
-        self.expense_repository: AbstractRepository = expense_repository()
+    async def get_all_expenses(self) -> list[ExpenseReadSchema]:
+        return await self.expense_repository.get_all()
+
+    async def get_expense_by_id(self, *, id: UUID) -> ExpenseReadSchema:
+        return await self.expense_repository.get_one(id=id)
 
     async def create_expense(
         self, *, expense: ExpenseCreateSchema
@@ -18,12 +20,6 @@ class ExpenseService:
         user_dict = expense.model_dump()
         expense = await self.expense_repository.add_one(data=user_dict)
         return expense
-
-    async def get_all_expenses(self) -> list[ExpenseReadSchema]:
-        return await self.expense_repository.get_all()
-
-    async def get_expense_by_id(self, *, id: UUID) -> ExpenseReadSchema:
-        return await self.expense_repository.get_one(id=id)
 
     async def update_expense_by_id(
         self, *, id: UUID, expense: ExpenseUpdateSchema
