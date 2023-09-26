@@ -1,14 +1,16 @@
 # ruff: noqa: F401
 
-from tests.fixtures.categories import create_categories_fixture
-from tests.fixtures.core import (
-    aclient,
-    check_database_mode,
-    clear_database_tables,
-    client,
+from tests.fixtures.core import aclient, client, event_loop
+from tests.fixtures.database.fixtures import (
+    _check_database_mode,
+    _clear_database_tables,
+    _prepare_database,
     database_session,
-    event_loop,
-    prepare_database,
 )
-from tests.fixtures.expenses import create_expenses_fixture
-from tests.fixtures.users import create_users_fixture
+from tests.fixtures.models import (
+    create_categories_fixture,
+    create_entities_fixture,
+    create_expenses_fixture,
+    create_users_fixture,
+)
+from tests.fixtures.unit_of_work import uow

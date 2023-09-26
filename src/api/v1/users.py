@@ -1,9 +1,10 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 
-from src.api.dependencies import UserServiceDepends, valid_user_id
+from src.api.dependencies import UnitOfWorkDepends
 from src.schemas.users import UserCreateSchema, UserReadSchema, UserUpdateSchema
+from src.services import UserService
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -11,49 +12,48 @@ router = APIRouter(prefix="/users", tags=["Users"])
 @router.get(
     "", response_model=list[UserReadSchema], status_code=status.HTTP_200_OK
 )
-async def get_users(user_service: UserServiceDepends) -> list[UserReadSchema]:
-    return await user_service.get_all_users()
+async def get_users(uow: UnitOfWorkDepends) -> list[UserReadSchema]:
+    return await UserService.get_all_users(uow=uow)
 
 
 @router.get(
     "/{user_id}", response_model=UserReadSchema, status_code=status.HTTP_200_OK
 )
-def get_user_by_id(
-    valid_user: UserReadSchema = Depends(valid_user_id),
+async def get_user_by_id(
+    uow: UnitOfWorkDepends, user_id: UUID
 ) -> UserReadSchema:
-    return valid_user
+    return await UserService.get_user_by_id(uow=uow, id=user_id)
 
 
 @router.post(
     "", response_model=UserReadSchema, status_code=status.HTTP_201_CREATED
 )
 async def add_user(
-    user: UserCreateSchema, user_service: UserServiceDepends
+    uow: UnitOfWorkDepends, user: UserCreateSchema
 ) -> UserReadSchema:
-    return await user_service.create_user(user=user)
+    return await UserService.create_user(uow=uow, user=user)
 
 
 @router.put(
     "/{user_id}",
     response_model=UserReadSchema,
-    dependencies=[Depends(valid_user_id)],
     status_code=status.HTTP_200_OK,
 )
 async def update_user_by_id(
+    uow: UnitOfWorkDepends,
     user_id: UUID,
     user: UserUpdateSchema,
-    user_service: UserServiceDepends,
 ) -> UserReadSchema:
-    return await user_service.update_user_by_id(id=user_id, user=user)
+    return await UserService.update_user_by_id(uow=uow, id=user_id, user=user)
 
 
 @router.delete(
     "/{user_id}",
     response_model=None,
-    dependencies=[Depends(valid_user_id)],
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def remove_user_by_id(
-    user_id: UUID, user_service: UserServiceDepends
+    uow: UnitOfWorkDepends,
+    user_id: UUID,
 ) -> None:
-    await user_service.delete_user_by_id(id=user_id)
+    await UserService.delete_user_by_id(uow=uow, id=user_id)

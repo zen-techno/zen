@@ -1,29 +1,86 @@
 from uuid import UUID
 
-from src.core.repository import AbstractRepository
+from src.core.repository.exceptions import (
+    RepositoryDoesNotExistError,
+    RepositoryError,
+    RepositoryIntegrityError,
+)
+from src.core.unit_of_work import AbstractUnitOfWork
 from src.schemas.users import UserCreateSchema, UserReadSchema, UserUpdateSchema
+from src.services.exceptions import (
+    ServiceBadRequestError,
+    ServiceError,
+    UserServiceNotFoundError,
+)
 
 
 class UserService:
-    def __init__(self, user_repository: type[AbstractRepository]) -> None:
-        self.user_repository: AbstractRepository = user_repository()
+    @staticmethod
+    async def get_all_users(*, uow: AbstractUnitOfWork) -> list[UserReadSchema]:
+        try:
+            async with uow:
+                return await uow.users.get_all()
 
-    async def create_user(self, *, user: UserCreateSchema) -> UserReadSchema:
-        user_dict = user.model_dump()
-        user = await self.user_repository.add_one(data=user_dict)
-        return user
+        except RepositoryError as exc:
+            raise ServiceError from exc
 
-    async def get_all_users(self) -> list[UserReadSchema]:
-        return await self.user_repository.get_all()
+    @staticmethod
+    async def get_user_by_id(
+        *, uow: AbstractUnitOfWork, id: UUID
+    ) -> UserReadSchema:
+        try:
+            async with uow:
+                user: UserReadSchema = await uow.users.get_one(id=id)
+                if user is None:
+                    await uow.rollback()
+                    raise UserServiceNotFoundError
+                return user
 
-    async def get_user_by_id(self, *, id: UUID) -> UserReadSchema:
-        return await self.user_repository.get_one(id=id)
+        except RepositoryError as exc:
+            raise ServiceError from exc
 
-    async def update_user_by_id(
-        self, *, id: UUID, user: UserUpdateSchema
+    @staticmethod
+    async def create_user(
+        *, uow: AbstractUnitOfWork, user: UserCreateSchema
     ) -> UserReadSchema:
         user_dict = user.model_dump()
-        return await self.user_repository.update_one(id=id, data=user_dict)
+        try:
+            async with uow:
+                created_user = await uow.users.add_one(data=user_dict)
+                await uow.commit()
+                return created_user
 
-    async def delete_user_by_id(self, *, id: UUID) -> None:
-        await self.user_repository.delete_one(id=id)
+        except RepositoryIntegrityError as exc:
+            raise ServiceBadRequestError from exc
+        except RepositoryError as exc:
+            raise ServiceError from exc
+
+    @staticmethod
+    async def update_user_by_id(
+        *, uow: AbstractUnitOfWork, id: UUID, user: UserUpdateSchema
+    ) -> UserReadSchema:
+        user_dict = user.model_dump()
+        try:
+            async with uow:
+                updated_user = await uow.users.update_one(id=id, data=user_dict)
+                await uow.commit()
+                return updated_user
+
+        except RepositoryDoesNotExistError as exc:
+            raise UserServiceNotFoundError from exc
+        except RepositoryIntegrityError as exc:
+            raise ServiceBadRequestError from exc
+        except RepositoryError as exc:
+            raise ServiceError from exc
+
+    @staticmethod
+    async def delete_user_by_id(*, uow: AbstractUnitOfWork, id: UUID) -> None:
+        try:
+            async with uow:
+                await uow.users.delete_one(id=id)
+                await uow.commit()
+
+        except RepositoryDoesNotExistError as exc:
+            raise UserServiceNotFoundError from exc
+        except RepositoryError as exc:
+            raise ServiceError from exc

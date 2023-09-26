@@ -1,55 +1,103 @@
 from typing import Any
 
 from sqlalchemy import delete, insert, select, update
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.core.repository.exceptions import (
+    RepositoryDoesNotExistError,
+    RepositoryError,
+    RepositoryIntegrityError,
+)
 from src.core.repository.repository import (
     ID,
     AbstractRepository,
-    DataDict,
-    ReadSchema,
+    EntityDict,
+    EntityReadSchema,
 )
-from src.database.database import async_session_maker
 
 
 class SQLAlchemyRepository(AbstractRepository):
     model = None
-    session_maker = async_session_maker
 
-    async def add_one(self, *, data: DataDict) -> ReadSchema:
-        async with self.session_maker() as session:
-            query = insert(self.model).values(**data).returning(self.model)
-            result = await session.execute(query)
-            await session.commit()
-            return result.scalar_one().to_read_model()
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
 
-    async def get_all(self) -> list[ReadSchema]:
-        async with self.session_maker() as session:
-            query = select(self.model)
-            result = await session.execute(query)
-            return [item.to_read_model() for item in result.scalars()]
+    async def get_all(self) -> list[EntityReadSchema]:
+        query = select(self.model)
+        try:
+            result = await self.session.execute(query)
+        except (SQLAlchemyError, Exception) as exc:
+            await self.session.rollback()
+            raise RepositoryError() from exc
 
-    async def get_one(self, **filter_by: Any) -> ReadSchema | None:
-        async with self.session_maker() as session:
-            query = select(self.model).filter_by(**filter_by)
-            result = await session.execute(query)
-            if result := result.scalar_one_or_none():
-                return result.to_read_model()
-            return None
+        return [item.to_read_model() for item in result.scalars()]
 
-    async def update_one(self, *, id: ID, data: DataDict) -> ReadSchema:
-        async with self.session_maker() as session:
-            query = (
-                update(self.model)
-                .values(**data)
-                .filter_by(id=id)
-                .returning(self.model)
-            )
-            result = await session.execute(query)
-            await session.commit()
+    async def get_one(self, **filter_by: Any) -> EntityReadSchema | None:
+        query = select(self.model).filter_by(**filter_by)
+        try:
+            result = await self.session.execute(query)
+        except (SQLAlchemyError, Exception) as exc:
+            await self.session.rollback()
+            raise RepositoryError() from exc
+
+        if result := result.scalars().first():
+            return result.to_read_model()
+        return None
+
+    async def add_one(self, *, data: EntityDict) -> EntityReadSchema:
+        query = insert(self.model).values(**data).returning(self.model)
+        try:
+            result = await self.session.execute(query)
+        except IntegrityError as exc:
+            await self.session.rollback()
+            raise RepositoryIntegrityError() from exc
+        except (SQLAlchemyError, Exception) as exc:
+            await self.session.rollback()
+            raise RepositoryError() from exc
+
+        return result.scalar_one().to_read_model()
+
+    async def update_one(self, *, id: ID, data: EntityDict) -> EntityReadSchema:
+        async with self.session.begin_nested():
+            try:
+                existence_query = select(self.model.id).filter_by(id=id)
+                result = await self.session.execute(existence_query)
+                is_exist = result.scalar_one_or_none()
+                if not is_exist:
+                    await self.session.rollback()
+                    raise RepositoryDoesNotExistError()
+
+                update_query = (
+                    update(self.model)
+                    .values(**data)
+                    .filter_by(id=id)
+                    .returning(self.model)
+                )
+                result = await self.session.execute(update_query)
+
+            except IntegrityError as exc:
+                await self.session.rollback()
+                raise RepositoryIntegrityError() from exc
+            except (SQLAlchemyError, Exception) as exc:
+                await self.session.rollback()
+                raise RepositoryError() from exc
+
             return result.scalar_one().to_read_model()
 
     async def delete_one(self, *, id: ID) -> None:
-        async with self.session_maker() as session:
-            query = delete(self.model).filter_by(id=id)
-            await session.execute(query)
-            await session.commit()
+        async with self.session.begin_nested():
+            try:
+                existence_query = select(self.model.id).filter_by(id=id)
+                result = await self.session.execute(existence_query)
+                is_exist = result.scalar_one_or_none()
+                if not is_exist:
+                    await self.session.rollback()
+                    raise RepositoryDoesNotExistError()
+
+                delete_query = delete(self.model).filter_by(id=id)
+                await self.session.execute(delete_query)
+
+            except (SQLAlchemyError, Exception) as exc:
+                await self.session.rollback()
+                raise RepositoryError() from exc

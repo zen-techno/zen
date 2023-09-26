@@ -5,8 +5,7 @@ description = ""
 authors = ["Rusih100 <rusih100@gmail.com>"]
 readme = "README.md"
 
-
-[tool.poetry.dependencies] # Dependencies
+[tool.poetry.dependencies]
 python = "^3.11"
 fastapi = "^0.103.1"
 uvicorn = "^0.23.2"
@@ -25,80 +24,70 @@ pytest-dotenv = "^0.5.2"
 httpx = "^0.25.0"
 pytest-cov = "^4.1.0"
 
-
-[tool.black] # Tools
-line-length = 80
+[tool.black]
 target-version = ['py311']
-exclude = '''
+line-length = 80
+# The alembic directory is not excluded in .gitignore
+extend-exclude = '''
 /(
-  | \.git
-  | \.mypy_cache
-  | \.venv
   | alembic
-  | env
-  | venv
-  | .ruff_cache
-  | .pytest_cache
 )/
 '''
 
 [tool.isort]
 profile = "black"
+line_length = 80
 multi_line_output = 3
 combine_as_imports = true
-line_length = 80
 
 [tool.ruff]
-src = ["src", "tests"]
-select = ["E", "ISC", "F", "UP", "ANN", "ASYNC", "TCH", "RUF"]
-ignore = ["F821", "UP007", "ANN101", "ANN401"]
-fixable = ["E", "ISC", "F", "UP", "ANN", "ASYNC", "TCH", "RUF"]
-unfixable = []
-line-length = 80
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-ignore-init-module-imports = true
 target-version = "py311"
-exclude = [
-    ".bzr",
-    ".direnv",
-    ".eggs",
-    ".git",
-    ".git-rewrite",
-    ".hg",
-    ".mypy_cache",
-    ".nox",
-    ".pants.d",
-    ".pytype",
-    ".ruff_cache",
-    ".svn",
-    ".tox",
-    ".venv",
-    "__pypackages__",
-    "_build",
-    "buck-out",
-    "build",
-    "dist",
-    "node_modules",
-    "venv",
-    "alembic",
-    "alembic.ini",
-    ".env",
-    ".test.env",
-    ".pytest_cache"
+line-length = 80
+ignore-init-module-imports = true
+extend-exclude = ["alembic"]  # The alembic directory is not excluded in .gitignore
+src = [
+    "src",
+    "tests"
 ]
-
-[tool.ruff.mccabe]
-max-complexity = 10
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "UP",     # pyupgrade
+    "C",      # flake8-comprehensions
+    "B",      # flake8-bugbear
+    "ISC",    # flake8-implicit-str-concat
+    "ASYNC",  # flake8-async
+    "ANN",    # flake8-annotations
+    "TCH",    # flake8-type-checking
+    "PT",     # flake8-pytest-style
+    "RUF",    # ruff-specific rules
+]
+ignore = [
+    "E501",   # line too long, handled by black
+    "B008",   # do not perform function calls in argument defaults
+    "F821",   # checks for uses of undefined names, breaks sqlalchemy models
+    "UP007",  # large models are unreadable
+    "ANN101", # removes type checking for self
+    "ANN401"  # allows type Any
+]
 
 [tool.pytest.ini_options]
-pythonpath = [
-    ".", "src"
-]
 asyncio_mode = "auto"
+pythonpath = [".", "src"]
 env_files = [
     ".test.env"
 ]
 
+[tool.coverage.run]
+branch = true
+concurrency = [
+    "greenlet",
+    "thread"
+]
+source = [
+    "src"
+]
 
 [build-system]
 requires = ["poetry-core"]
