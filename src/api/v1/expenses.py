@@ -1,16 +1,13 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 
-from src.api.dependencies import (
-    UnitOfWorkDepends
-)
+from src.api.dependencies import UnitOfWorkDepends
 from src.schemas.expenses import (
     ExpenseCreateSchema,
     ExpenseReadSchema,
     ExpenseUpdateSchema,
 )
-
 from src.services import ExpenseService
 
 router = APIRouter(prefix="/expenses", tags=["Expenses"])
@@ -28,7 +25,9 @@ async def get_expenses(uow: UnitOfWorkDepends) -> list[ExpenseReadSchema]:
     response_model=ExpenseReadSchema,
     status_code=status.HTTP_200_OK,
 )
-async def get_expense_by_id(uow: UnitOfWorkDepends, expense_id: UUID) -> ExpenseReadSchema:
+async def get_expense_by_id(
+    uow: UnitOfWorkDepends, expense_id: UUID
+) -> ExpenseReadSchema:
     return await ExpenseService.get_expense_by_id(uow=uow, id=expense_id)
 
 
@@ -47,11 +46,11 @@ async def add_expense(
     status_code=status.HTTP_200_OK,
 )
 async def update_expense_by_id(
-    uow: UnitOfWorkDepends,
-    expense_id: UUID,
-    expense: ExpenseUpdateSchema
+    uow: UnitOfWorkDepends, expense_id: UUID, expense: ExpenseUpdateSchema
 ) -> ExpenseReadSchema:
-    return await ExpenseService.update_expense_by_id(uow=uow, id=expense_id, expense=expense)
+    return await ExpenseService.update_expense_by_id(
+        uow=uow, id=expense_id, expense=expense
+    )
 
 
 @router.delete(

@@ -4,18 +4,19 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.repository import SQLAlchemyRepository
 from tests.fixtures.database.database_metadata import Entity, EntityReadSchema
 from tests.fixtures.models import test_entities
+from tests.fixtures.unit_of_work import UnitOfWorkForTest
 
 
 class TestSQLAlchemyRepository:
     async def test_get_all(
         self,
-        repository: SQLAlchemyRepository,
+        uow: UnitOfWorkForTest,
         create_entities_fixture: list[Entity],
     ) -> None:
-        entities = await repository.get_all()
+        async with uow:
+            entities = await uow.entities.get_all()
 
         assert len(entities) == len(create_entities_fixture)
 
@@ -25,9 +26,11 @@ class TestSQLAlchemyRepository:
         assert [e.model_dump() for e in entities] == test_entities
 
     async def test_get_all_empty(
-        self, repository: SQLAlchemyRepository
+        self,
+        uow: UnitOfWorkForTest,
     ) -> None:
-        entities = await repository.get_all()
+        async with uow:
+            entities = await uow.entities.get_all()
 
         assert len(entities) == 0
         assert entities == []
@@ -36,10 +39,11 @@ class TestSQLAlchemyRepository:
     async def test_get_one_by_id(
         self,
         entity: dict[str, Any],
-        repository: SQLAlchemyRepository,
+        uow: UnitOfWorkForTest,
         create_entities_fixture: list[Entity],
     ) -> None:
-        database_entity = await repository.get_one(id=entity["id"])
+        async with uow:
+            database_entity = await uow.entities.get_one(id=entity["id"])
 
         assert database_entity is not None
         assert isinstance(database_entity, EntityReadSchema)
@@ -47,14 +51,15 @@ class TestSQLAlchemyRepository:
 
     async def test_get_one_by_many_param(
         self,
-        repository: SQLAlchemyRepository,
+        uow: UnitOfWorkForTest,
         create_entities_fixture: list[Entity],
     ) -> None:
         params = {
             "username": test_entities[0]["username"],
             "balance": test_entities[0]["balance"],
         }
-        database_entity = await repository.get_one(**params)
+        async with uow:
+            database_entity = await uow.entities.get_one(**params)
 
         assert database_entity is not None
         assert isinstance(database_entity, EntityReadSchema)
@@ -62,25 +67,31 @@ class TestSQLAlchemyRepository:
 
     async def test_get_one_not_found(
         self,
-        repository: SQLAlchemyRepository,
+        uow: UnitOfWorkForTest,
         create_entities_fixture: list[Entity],
     ) -> None:
         params = {
             "username": "JackJack",
         }
-        database_entity = await repository.get_one(**params)
+        async with uow:
+            database_entity = await uow.entities.get_one(**params)
         assert database_entity is None
 
     @pytest.mark.parametrize("entity", test_entities)
     async def test_add_one(
         self,
         entity: dict[str, Any],
-        repository: SQLAlchemyRepository,
+        uow: UnitOfWorkForTest,
         database_session: AsyncSession,
     ) -> None:
-        created_entity = await repository.add_one(
-            data={"username": entity["username"], "balance": entity["balance"]}
-        )
+        async with uow:
+            created_entity = await uow.entities.add_one(
+                data={
+                    "username": entity["username"],
+                    "balance": entity["balance"],
+                }
+            )
+            await uow.commit()
         assert created_entity is not None
         assert isinstance(created_entity, EntityReadSchema)
 
@@ -96,7 +107,7 @@ class TestSQLAlchemyRepository:
 
     async def test_add_one_unique(
         self,
-        repository: SQLAlchemyRepository,
+        uow: UnitOfWorkForTest,
     ) -> None:
         # raise NotImplementedError
         ...
@@ -105,14 +116,16 @@ class TestSQLAlchemyRepository:
     async def test_update_one(
         self,
         entity: dict[str, Any],
-        repository: SQLAlchemyRepository,
+        uow: UnitOfWorkForTest,
         database_session: AsyncSession,
         create_entities_fixture: list[Entity],
     ) -> None:
         new_balance = 0
-        updated_entity = await repository.update_one(
-            id=entity["id"], data={"balance": new_balance}
-        )
+        async with uow:
+            updated_entity = await uow.entities.update_one(
+                id=entity["id"], data={"balance": new_balance}
+            )
+            await uow.commit()
         assert updated_entity is not None
         assert isinstance(updated_entity, EntityReadSchema)
 
@@ -133,14 +146,14 @@ class TestSQLAlchemyRepository:
 
     async def test_update_or_unique(
         self,
-        repository: SQLAlchemyRepository,
+        uow: UnitOfWorkForTest,
     ) -> None:
         # raise NotImplementedError
         ...
 
     async def test_update_not_found(
         self,
-        repository: SQLAlchemyRepository,
+        uow: UnitOfWorkForTest,
     ) -> None:
         # raise NotImplementedError
         ...
@@ -149,12 +162,13 @@ class TestSQLAlchemyRepository:
     async def test_delete_one(
         self,
         entity: dict[str, Any],
-        repository: SQLAlchemyRepository,
+        uow: UnitOfWorkForTest,
         database_session: AsyncSession,
         create_entities_fixture: list[Entity],
     ) -> None:
-        await repository.delete_one(id=entity["id"])
-
+        async with uow:
+            await uow.entities.delete_one(id=entity["id"])
+            await uow.commit()
         query = select(Entity).filter_by(id=entity["id"])
 
         result = await database_session.execute(query)
@@ -164,7 +178,7 @@ class TestSQLAlchemyRepository:
 
     async def test_delete_not_found(
         self,
-        repository: SQLAlchemyRepository,
+        uow: UnitOfWorkForTest,
     ) -> None:
         # raise NotImplementedError
         ...

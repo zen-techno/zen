@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 
 from src.api.v1.categories import router as categories_router
-
 from src.api.v1.expenses import router as expenses_router
 from src.api.v1.users import router as users_router
 

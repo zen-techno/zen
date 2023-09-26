@@ -13,4 +13,4 @@ from tests.fixtures.models import (
     create_expenses_fixture,
     create_users_fixture,
 )
-from tests.fixtures.repository import repository
+from tests.fixtures.unit_of_work import uow

@@ -1,18 +1,30 @@
 from uuid import UUID
 
-from src.core.repository.exceptions import RepositoryError, RepositoryIntegrityError, RepositoryDoesNotExistError
+from src.core.repository.exceptions import (
+    RepositoryDoesNotExistError,
+    RepositoryError,
+    RepositoryIntegrityError,
+)
 from src.core.unit_of_work import AbstractUnitOfWork
 from src.schemas.expenses import (
     ExpenseCreateSchema,
     ExpenseReadSchema,
     ExpenseUpdateSchema,
 )
-from src.services.exceptions import ServiceError, ExpenseServiceNotFoundError, CategoryServiceNotFoundError, UserServiceNotFoundError, ServiceBadRequestError
+from src.services.exceptions import (
+    CategoryServiceNotFoundError,
+    ExpenseServiceNotFoundError,
+    ServiceBadRequestError,
+    ServiceError,
+    UserServiceNotFoundError,
+)
 
 
 class ExpenseService:
     @staticmethod
-    async def get_all_expenses(*, uow: AbstractUnitOfWork) -> list[ExpenseReadSchema]:
+    async def get_all_expenses(
+        *, uow: AbstractUnitOfWork
+    ) -> list[ExpenseReadSchema]:
         try:
             async with uow:
                 return await uow.expenses.get_all()
@@ -21,7 +33,9 @@ class ExpenseService:
             raise ServiceError from exc
 
     @staticmethod
-    async def get_expense_by_id(*, uow: AbstractUnitOfWork, id: UUID) -> ExpenseReadSchema:
+    async def get_expense_by_id(
+        *, uow: AbstractUnitOfWork, id: UUID
+    ) -> ExpenseReadSchema:
         try:
             async with uow:
                 expense: ExpenseReadSchema = await uow.expenses.get_one(id=id)
@@ -45,7 +59,9 @@ class ExpenseService:
                     await uow.rollback()
                     raise UserServiceNotFoundError
 
-                is_category_exist = await uow.categories.get_one(id=expense.category_id)
+                is_category_exist = await uow.categories.get_one(
+                    id=expense.category_id
+                )
                 if not is_category_exist:
                     await uow.rollback()
                     raise CategoryServiceNotFoundError
@@ -71,12 +87,16 @@ class ExpenseService:
                     await uow.rollback()
                     raise UserServiceNotFoundError
 
-                is_category_exist = await uow.categories.get_one(id=expense.category_id)
+                is_category_exist = await uow.categories.get_one(
+                    id=expense.category_id
+                )
                 if not is_category_exist:
                     await uow.rollback()
                     raise CategoryServiceNotFoundError
 
-                updated_expense = await uow.expenses.update_one(id=id, data=expense_dict)
+                updated_expense = await uow.expenses.update_one(
+                    id=id, data=expense_dict
+                )
                 await uow.commit()
                 return updated_expense
 
@@ -88,7 +108,9 @@ class ExpenseService:
             raise ServiceError from exc
 
     @staticmethod
-    async def delete_expense_by_id(*, uow: AbstractUnitOfWork, id: UUID) -> None:
+    async def delete_expense_by_id(
+        *, uow: AbstractUnitOfWork, id: UUID
+    ) -> None:
         try:
             async with uow:
                 await uow.expenses.delete_one(id=id)
