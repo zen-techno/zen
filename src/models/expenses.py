@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import CheckConstraint, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base
@@ -14,20 +14,24 @@ class Expense(Base):
     __tablename__ = "expense"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    name: Mapped[str] = mapped_column(nullable=False)
+    name: Mapped[str] = mapped_column(nullable=False, index=True)
     amount: Mapped[int] = mapped_column(nullable=False)
-    transaction_date: Mapped[datetime] = mapped_column(
+    transaction_at: Mapped[datetime] = mapped_column(
         nullable=False, default=datetime.now
     )
     who_paid_id: Mapped[UUID] = mapped_column(
         ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
     category_id: Mapped[UUID] = mapped_column(
-        ForeignKey("category.id", ondelete="RESTRICT"), nullable=False
+        ForeignKey("category.id", ondelete="CASCADE"), nullable=False
     )
 
     who_paid: Mapped["User"] = relationship(back_populates="expenses")
     category: Mapped["Category"] = relationship(back_populates="expenses")
+
+    __table_args__ = (
+        CheckConstraint(sqltext="amount > 0", name="check_amount"),
+    )
 
     def __repr__(self) -> str:
         return (
@@ -39,7 +43,7 @@ class Expense(Base):
             id=self.id,
             name=self.name,
             amount=self.amount,
-            transaction_date=self.transaction_date,
+            transaction_at=self.transaction_at,
             who_paid=UserReadSchema(
                 id=self.who_paid.id,
                 name=self.who_paid.name,

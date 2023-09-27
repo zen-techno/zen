@@ -115,7 +115,7 @@ class TestExpenseAPI:
         assert result
         assert created_expense_id == str(result.id)
         assert created_transaction_date == jsonable_encoder(
-            result.transaction_date
+            result.transaction_at
         )
         assert created_expense_name == result.name
         assert created_expense_amount == result.amount
@@ -176,7 +176,7 @@ class TestExpenseAPI:
         assert result
         assert updated_expense_id == str(result.id)
         assert updated_transaction_date == jsonable_encoder(
-            result.transaction_date
+            result.transaction_at
         )
         assert updated_expense_name == result.name
         assert updated_expense_amount == result.amount

@@ -11,7 +11,7 @@ class ExpenseReadSchema(BaseModel):
     id: UUID
     name: str
     amount: PositiveInt
-    transaction_date: datetime
+    transaction_at: datetime
     who_paid: UserReadSchema
     category: CategoryReadSchema
 
