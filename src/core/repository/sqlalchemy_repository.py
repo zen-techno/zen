@@ -23,8 +23,8 @@ class SQLAlchemyRepository(AbstractRepository):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get_all(self) -> list[EntityReadSchema]:
-        query = select(self.model)
+    async def get_all(self, **filter_by: Any) -> list[EntityReadSchema]:
+        query = select(self.model).filter_by(**filter_by)
         try:
             result = await self.session.execute(query)
         except (SQLAlchemyError, Exception) as exc:

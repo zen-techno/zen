@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import CheckConstraint, String
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base
@@ -28,17 +28,17 @@ class User(Base):
     expenses: Mapped[list["Expense"]] = relationship(back_populates="who_paid")
     categories: Mapped[list["Category"]] = relationship(back_populates="user")
 
-    __table_args__ = (
-        CheckConstraint(
-            sqltext="REGEXP_LIKE(email, '/^[A-Z0-9._%+-]+@[A-Z0-9-]+.+.[A-Z]{2,4}$/i')",
-            name="check_email",
-        ),
-    )
-
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, name={self.name!r})"
 
     def to_read_model(self) -> UserReadSchema:
         return UserReadSchema(
-            id=self.id, name=self.name, telegram_id=self.telegram_id
+            id=self.id,
+            name=self.name,
+            email=self.email,
+            registered_at=self.registered_at,
+            is_active=self.is_active,
+            is_superuser=self.is_superuser,
+            is_verified=self.is_verified,
+            telegram_id=self.telegram_id,
         )

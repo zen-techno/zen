@@ -109,8 +109,7 @@ class TestSQLAlchemyRepository:
         self,
         uow: UnitOfWorkForTest,
     ) -> None:
-        # raise NotImplementedError
-        ...
+        raise NotImplementedError
 
     @pytest.mark.parametrize("entity", test_entities)
     async def test_update_one(
@@ -148,15 +147,13 @@ class TestSQLAlchemyRepository:
         self,
         uow: UnitOfWorkForTest,
     ) -> None:
-        # raise NotImplementedError
-        ...
+        raise NotImplementedError
 
     async def test_update_not_found(
         self,
         uow: UnitOfWorkForTest,
     ) -> None:
-        # raise NotImplementedError
-        ...
+        raise NotImplementedError
 
     @pytest.mark.parametrize("entity", test_entities)
     async def test_delete_one(
@@ -180,5 +177,4 @@ class TestSQLAlchemyRepository:
         self,
         uow: UnitOfWorkForTest,
     ) -> None:
-        # raise NotImplementedError
-        ...
+        raise NotImplementedError

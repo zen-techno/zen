@@ -23,4 +23,4 @@ class Category(Base):
         return f"Category(id={self.id!r}, name={self.name!r})"
 
     def to_read_model(self) -> CategoryReadSchema:
-        return CategoryReadSchema(id=self.id, name=self.name)
+        return CategoryReadSchema(id=self.id, name=self.name, user_id=self.user_id)

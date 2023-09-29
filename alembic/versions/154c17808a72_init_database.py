@@ -1,18 +1,18 @@
 """Init database
 
-Revision ID: 0400d8b2b5fb
+Revision ID: 154c17808a72
 Revises: 
-Create Date: 2023-09-27 14:59:57.857062
+Create Date: 2023-09-28 17:22:52.103188
 
 """
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = '0400d8b2b5fb'
+revision: str = '154c17808a72'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -30,7 +30,6 @@ def upgrade() -> None:
     sa.Column('is_superuser', sa.Boolean(), nullable=False),
     sa.Column('is_verified', sa.Boolean(), nullable=False),
     sa.Column('telegram_id', sa.Integer(), nullable=True),
-    sa.CheckConstraint("REGEXP_LIKE(email, '/^[A-Z0-9._%+-]+@[A-Z0-9-]+.+.[A-Z]{2,4}$/i')", name='check_email'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('telegram_id')
     )

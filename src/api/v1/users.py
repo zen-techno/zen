@@ -22,7 +22,7 @@ async def get_users(uow: UnitOfWorkDepends) -> list[UserReadSchema]:
 async def get_user_by_id(
     uow: UnitOfWorkDepends, user_id: UUID
 ) -> UserReadSchema:
-    return await UserService.get_user_by_id(uow=uow, id=user_id)
+    return await UserService.get_user_by_id(uow=uow, user_id=user_id)
 
 
 @router.post(
@@ -44,7 +44,9 @@ async def update_user_by_id(
     user_id: UUID,
     user: UserUpdateSchema,
 ) -> UserReadSchema:
-    return await UserService.update_user_by_id(uow=uow, id=user_id, user=user)
+    return await UserService.update_user_by_id(
+        uow=uow, user_id=user_id, user=user
+    )
 
 
 @router.delete(
@@ -56,4 +58,4 @@ async def remove_user_by_id(
     uow: UnitOfWorkDepends,
     user_id: UUID,
 ) -> None:
-    await UserService.delete_user_by_id(uow=uow, id=user_id)
+    await UserService.delete_user_by_id(uow=uow, user_id=user_id)
