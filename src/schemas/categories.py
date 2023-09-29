@@ -11,17 +11,7 @@ class CategoryReadSchema(BaseModel):
 
 class CategoryCreateSchema(BaseModel):
     name: str
-    user_id: UUID
 
 
 class CategoryUpdateSchema(BaseModel):
-    name: str
-    user_id: UUID
-
-
-class UserCategoryCreateSchema(BaseModel):
-    name: str
-
-
-class UserCategoryUpdateSchema(BaseModel):
     name: str

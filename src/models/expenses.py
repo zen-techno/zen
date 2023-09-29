@@ -44,12 +44,4 @@ class Expense(Base):
             name=self.name,
             amount=self.amount,
             transaction_at=self.transaction_at,
-            who_paid=UserReadSchema(
-                id=self.who_paid.id,
-                name=self.who_paid.name,
-                telegram_id=self.who_paid.telegram_id,
-            ),
-            category=CategoryReadSchema(
-                id=self.category.id, name=self.category.name
-            ),
         )

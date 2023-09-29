@@ -10,14 +10,20 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.get(
-    "", response_model=list[UserReadSchema], status_code=status.HTTP_200_OK
+    "",
+    response_model=list[UserReadSchema],
+    status_code=status.HTTP_200_OK,
+    summary="Getting all users",
 )
 async def get_users(uow: UnitOfWorkDepends) -> list[UserReadSchema]:
     return await UserService.get_all_users(uow=uow)
 
 
 @router.get(
-    "/{user_id}", response_model=UserReadSchema, status_code=status.HTTP_200_OK
+    "/{user_id}",
+    response_model=UserReadSchema,
+    status_code=status.HTTP_200_OK,
+    summary="Getting a specific user",
 )
 async def get_user_by_id(
     uow: UnitOfWorkDepends, user_id: UUID
@@ -26,7 +32,10 @@ async def get_user_by_id(
 
 
 @router.post(
-    "", response_model=UserReadSchema, status_code=status.HTTP_201_CREATED
+    "",
+    response_model=UserReadSchema,
+    status_code=status.HTTP_201_CREATED,
+    summary="Creating a user",
 )
 async def add_user(
     uow: UnitOfWorkDepends, user: UserCreateSchema
@@ -38,6 +47,7 @@ async def add_user(
     "/{user_id}",
     response_model=UserReadSchema,
     status_code=status.HTTP_200_OK,
+    summary="Updating a specific user",
 )
 async def update_user_by_id(
     uow: UnitOfWorkDepends,
@@ -53,6 +63,7 @@ async def update_user_by_id(
     "/{user_id}",
     response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
+    summary="Deleting a specific user",
 )
 async def remove_user_by_id(
     uow: UnitOfWorkDepends,
