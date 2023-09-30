@@ -5,9 +5,7 @@ from sqlalchemy import CheckConstraint, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base
-from src.schemas.categories import CategoryReadSchema
 from src.schemas.expenses import ExpenseReadSchema
-from src.schemas.users import UserReadSchema
 
 
 class Expense(Base):

@@ -1,9 +1,14 @@
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint, ASGIApp, Request, Response
+from logging import getLogger
+
 from fastapi import status
 from fastapi.responses import JSONResponse
-
-
-from logging import getLogger
+from starlette.middleware.base import (
+    ASGIApp,
+    BaseHTTPMiddleware,
+    Request,
+    RequestResponseEndpoint,
+    Response,
+)
 
 logger = getLogger("ErrorHandlingMiddleware")
 
@@ -19,6 +24,9 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
             response = await call_next(request)
         except Exception as exc:
             logger.exception(exc)
-            return JSONResponse({"detail": "Internal server error"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return JSONResponse(
+                {"detail": "Internal server error"},
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return response

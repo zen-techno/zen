@@ -4,8 +4,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from src.api import router
-from src.database import check_database_connection
 from src.api.middlewares import ErrorHandlingMiddleware
+from src.database import check_database_connection
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
