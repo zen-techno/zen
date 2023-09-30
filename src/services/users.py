@@ -1,3 +1,4 @@
+from logging import getLogger
 from uuid import UUID
 
 from src.core.repository.exceptions import (
@@ -13,6 +14,8 @@ from src.services.exceptions import (
     UserServiceNotFoundError,
 )
 
+logger = getLogger("UserService")
+
 
 class UserService:
     @staticmethod
@@ -22,21 +25,23 @@ class UserService:
                 return await uow.users.get_all()
 
         except RepositoryError as exc:
+            logger.exception(exc)
             raise ServiceError from exc
 
     @staticmethod
     async def get_user_by_id(
-        *, uow: AbstractUnitOfWork, id: UUID
+        *, uow: AbstractUnitOfWork, user_id: UUID
     ) -> UserReadSchema:
         try:
             async with uow:
-                user: UserReadSchema = await uow.users.get_one(id=id)
+                user: UserReadSchema = await uow.users.get_one(id=user_id)
                 if user is None:
                     await uow.rollback()
                     raise UserServiceNotFoundError
                 return user
 
         except RepositoryError as exc:
+            logger.exception(exc)
             raise ServiceError from exc
 
     @staticmethod
@@ -51,36 +56,47 @@ class UserService:
                 return created_user
 
         except RepositoryIntegrityError as exc:
+            logger.exception(exc)
             raise ServiceBadRequestError from exc
         except RepositoryError as exc:
+            logger.exception(exc)
             raise ServiceError from exc
 
     @staticmethod
     async def update_user_by_id(
-        *, uow: AbstractUnitOfWork, id: UUID, user: UserUpdateSchema
+        *, uow: AbstractUnitOfWork, user_id: UUID, user: UserUpdateSchema
     ) -> UserReadSchema:
         user_dict = user.model_dump()
         try:
             async with uow:
-                updated_user = await uow.users.update_one(id=id, data=user_dict)
+                updated_user = await uow.users.update_one(
+                    id=user_id, data=user_dict
+                )
                 await uow.commit()
                 return updated_user
 
         except RepositoryDoesNotExistError as exc:
+            logger.exception(exc)
             raise UserServiceNotFoundError from exc
         except RepositoryIntegrityError as exc:
+            logger.exception(exc)
             raise ServiceBadRequestError from exc
         except RepositoryError as exc:
+            logger.exception(exc)
             raise ServiceError from exc
 
     @staticmethod
-    async def delete_user_by_id(*, uow: AbstractUnitOfWork, id: UUID) -> None:
+    async def delete_user_by_id(
+        *, uow: AbstractUnitOfWork, user_id: UUID
+    ) -> None:
         try:
             async with uow:
-                await uow.users.delete_one(id=id)
+                await uow.users.delete_one(id=user_id)
                 await uow.commit()
 
         except RepositoryDoesNotExistError as exc:
+            logger.exception(exc)
             raise UserServiceNotFoundError from exc
         except RepositoryError as exc:
+            logger.exception(exc)
             raise ServiceError from exc

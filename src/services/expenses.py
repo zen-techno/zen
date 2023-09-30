@@ -1,3 +1,4 @@
+from logging import getLogger
 from uuid import UUID
 
 from src.core.repository.exceptions import (
@@ -19,83 +20,139 @@ from src.services.exceptions import (
     UserServiceNotFoundError,
 )
 
+logger = getLogger("ExpenseService")
+
 
 class ExpenseService:
     @staticmethod
     async def get_all_expenses(
-        *, uow: AbstractUnitOfWork
+        *, uow: AbstractUnitOfWork, user_id: UUID, category_id: UUID
     ) -> list[ExpenseReadSchema]:
         try:
             async with uow:
-                return await uow.expenses.get_all()
+                user = await uow.users.get_one(id=user_id)
+                if user is None:
+                    await uow.rollback()
+                    raise UserServiceNotFoundError
+
+                category = await uow.categories.get_one(
+                    id=category_id, user_id=user_id
+                )
+                if category is None:
+                    await uow.rollback()
+                    raise CategoryServiceNotFoundError
+
+                return await uow.expenses.get_all(who_paid_id=user_id)
 
         except RepositoryError as exc:
+            logger.exception(exc)
             raise ServiceError from exc
 
     @staticmethod
     async def get_expense_by_id(
-        *, uow: AbstractUnitOfWork, id: UUID
+        *,
+        uow: AbstractUnitOfWork,
+        user_id: UUID,
+        category_id: UUID,
+        expense_id: UUID,
     ) -> ExpenseReadSchema:
         try:
             async with uow:
-                expense: ExpenseReadSchema = await uow.expenses.get_one(id=id)
+                user = await uow.users.get_one(id=user_id)
+                if user is None:
+                    await uow.rollback()
+                    raise UserServiceNotFoundError
+
+                category = await uow.categories.get_one(
+                    id=category_id, user_id=user_id
+                )
+                if category is None:
+                    await uow.rollback()
+                    raise CategoryServiceNotFoundError
+
+                expense: ExpenseReadSchema = await uow.expenses.get_one(
+                    id=expense_id, who_paid_id=user_id, category_id=category_id
+                )
                 if expense is None:
                     await uow.rollback()
                     raise ExpenseServiceNotFoundError
                 return expense
 
         except RepositoryError as exc:
+            logger.exception(exc)
             raise ServiceError from exc
 
     @staticmethod
     async def create_expense(
-        *, uow: AbstractUnitOfWork, expense: ExpenseCreateSchema
+        *,
+        uow: AbstractUnitOfWork,
+        user_id: UUID,
+        category_id: UUID,
+        expense: ExpenseCreateSchema,
     ) -> ExpenseReadSchema:
         expense_dict = expense.model_dump()
         try:
             async with uow:
-                is_user_exist = await uow.users.get_one(id=expense.who_paid_id)
-                if not is_user_exist:
+                user = await uow.users.get_one(id=user_id)
+                if user is None:
                     await uow.rollback()
                     raise UserServiceNotFoundError
 
-                is_category_exist = await uow.categories.get_one(
-                    id=expense.category_id
+                category = await uow.categories.get_one(
+                    id=category_id, user_id=user_id
                 )
-                if not is_category_exist:
+                if category is None:
                     await uow.rollback()
                     raise CategoryServiceNotFoundError
 
-                created_expense = await uow.expenses.add_one(data=expense_dict)
+                created_expense = await uow.expenses.add_one(
+                    data={
+                        **expense_dict,
+                        "who_paid_id": user_id,
+                        "category_id": category_id,
+                    }
+                )
                 await uow.commit()
                 return created_expense
 
         except RepositoryIntegrityError as exc:
+            logger.exception(exc)
             raise ServiceBadRequestError from exc
         except RepositoryError as exc:
+            logger.exception(exc)
             raise ServiceError from exc
 
     @staticmethod
     async def update_expense_by_id(
-        *, uow: AbstractUnitOfWork, id: UUID, expense: ExpenseUpdateSchema
+        *,
+        uow: AbstractUnitOfWork,
+        user_id: UUID,
+        category_id: UUID,
+        expense_id: UUID,
+        expense: ExpenseUpdateSchema,
     ) -> ExpenseReadSchema:
         expense_dict = expense.model_dump()
         try:
             async with uow:
-                is_user_exist = await uow.users.get_one(id=expense.who_paid_id)
-                if not is_user_exist:
+                user = await uow.users.get_one(id=user_id)
+                if user is None:
                     await uow.rollback()
                     raise UserServiceNotFoundError
 
-                is_category_exist = await uow.categories.get_one(
-                    id=expense.category_id
+                category = await uow.categories.get_one(
+                    id=category_id, user_id=user_id
                 )
-                if not is_category_exist:
+                if category is None:
                     await uow.rollback()
                     raise CategoryServiceNotFoundError
 
                 updated_expense = await uow.expenses.update_one(
-                    id=id, data=expense_dict
+                    id=expense_id,
+                    data={
+                        **expense_dict,
+                        "who_paid_id": user_id,
+                        "category_id": category_id,
+                    },
                 )
                 await uow.commit()
                 return updated_expense
@@ -103,20 +160,39 @@ class ExpenseService:
         except RepositoryDoesNotExistError as exc:
             raise ExpenseServiceNotFoundError from exc
         except RepositoryIntegrityError as exc:
+            logger.exception(exc)
             raise ServiceBadRequestError from exc
         except RepositoryError as exc:
+            logger.exception(exc)
             raise ServiceError from exc
 
     @staticmethod
     async def delete_expense_by_id(
-        *, uow: AbstractUnitOfWork, id: UUID
+        *,
+        uow: AbstractUnitOfWork,
+        user_id: UUID,
+        category_id: UUID,
+        expense_id: UUID,
     ) -> None:
         try:
             async with uow:
-                await uow.expenses.delete_one(id=id)
+                user = await uow.users.get_one(id=user_id)
+                if user is None:
+                    await uow.rollback()
+                    raise UserServiceNotFoundError
+
+                category = await uow.categories.get_one(
+                    id=category_id, user_id=user_id
+                )
+                if category is None:
+                    await uow.rollback()
+                    raise CategoryServiceNotFoundError
+
+                await uow.expenses.delete_one(id=expense_id)
                 await uow.commit()
 
         except RepositoryDoesNotExistError as exc:
             raise ExpenseServiceNotFoundError from exc
         except RepositoryError as exc:
+            logger.exception(exc)
             raise ServiceError from exc

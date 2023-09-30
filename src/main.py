@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from src.api import router
+from src.api.middlewares import ErrorHandlingMiddleware
 from src.database import check_database_connection
 
 
@@ -20,6 +21,5 @@ app = FastAPI(
     debug=True,
 )
 
+app.add_middleware(ErrorHandlingMiddleware)
 app.include_router(router)
-
-# TODO: Настроить логирование, Sentry

@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class CategoryReadSchema(BaseModel):
     id: UUID
     name: str
+    user_id: UUID
 
 
 class CategoryCreateSchema(BaseModel):
