@@ -42,7 +42,7 @@ class ExpenseService:
                     await uow.rollback()
                     raise CategoryServiceNotFoundError
 
-                return await uow.expenses.get_all(who_paid_ids=user_id)
+                return await uow.expenses.get_all(who_paid_id=user_id)
 
         except RepositoryError as exc:
             logger.exception(exc)

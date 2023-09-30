@@ -5,7 +5,7 @@ from fastapi import FastAPI
 
 from src.api import router
 from src.database import check_database_connection
-
+from src.api.middlewares import ErrorHandlingMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
@@ -20,6 +20,5 @@ app = FastAPI(
     debug=True,
 )
 
+app.add_middleware(ErrorHandlingMiddleware)
 app.include_router(router)
-
-# TODO: Настроить логирование, Sentry
