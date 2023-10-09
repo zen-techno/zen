@@ -4,20 +4,20 @@ import pytest
 
 from src.core.repository import SQLAlchemyRepository
 from src.core.unit_of_work import UnitOfWork
-from src.database import async_session_maker
 from src.repositories import (
     CategoryRepository,
     ExpenseRepository,
     UserRepository,
 )
-from tests.fixtures.database.database_metadata import Entity
+from src.storage.sqlalchemy import async_session_maker
+from tests.fixtures.database.database_metadata import EntityModel
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class EntityRepository(SQLAlchemyRepository):
-    model = Entity
+    model = EntityModel
 
 
 class UnitOfWorkForTest(UnitOfWork):

@@ -4,7 +4,7 @@ from fastapi import status
 from fastapi.exceptions import HTTPException
 
 
-class ServiceError(HTTPException):
+class BaseError(HTTPException):
     detail = "Internal server error"
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     headers: Optional[dict[str, str]] = None
@@ -15,6 +15,12 @@ class ServiceError(HTTPException):
             detail=self.detail,
             headers=self.headers,
         )
+
+
+class ServiceError(BaseError):
+    detail = "Internal server error"
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    headers: Optional[dict[str, str]] = None
 
 
 class ServiceNotFoundError(ServiceError):
@@ -37,3 +43,17 @@ class ExpenseServiceNotFoundError(ServiceNotFoundError):
 class ServiceBadRequestError(ServiceError):
     detail = "Bad request"
     status_code = status.HTTP_400_BAD_REQUEST
+
+
+class AuthServiceBadRequest(ServiceBadRequestError):
+    detail = "Wrong login or password"
+
+
+class AuthServiceJWTError(BaseError):
+    detail = "Invalid token"
+    status_code = status.HTTP_401_UNAUTHORIZED
+    headers = {"WWW-Authenticate": "Bearer"}
+
+
+class AuthServiceJWTExpiredSignature(AuthServiceJWTError):
+    detail = "Expired signature"

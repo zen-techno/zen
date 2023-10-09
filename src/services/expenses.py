@@ -1,23 +1,23 @@
 from logging import getLogger
 from uuid import UUID
 
-from src.core.repository.exceptions import (
+from src.core.unit_of_work import AbstractUnitOfWork
+from src.exceptions.repositories import (
     RepositoryDoesNotExistError,
     RepositoryError,
     RepositoryIntegrityError,
 )
-from src.core.unit_of_work import AbstractUnitOfWork
-from src.schemas.expenses import (
-    ExpenseCreateSchema,
-    ExpenseReadSchema,
-    ExpenseUpdateSchema,
-)
-from src.services.exceptions import (
+from src.exceptions.services import (
     CategoryServiceNotFoundError,
     ExpenseServiceNotFoundError,
     ServiceBadRequestError,
     ServiceError,
     UserServiceNotFoundError,
+)
+from src.schemas.expenses import (
+    ExpenseCreateSchema,
+    ExpenseReadSchema,
+    ExpenseUpdateSchema,
 )
 
 logger = getLogger("ExpenseService")
@@ -42,7 +42,8 @@ class ExpenseService:
                     await uow.rollback()
                     raise CategoryServiceNotFoundError
 
-                return await uow.expenses.get_all(who_paid_id=user_id)
+                expenses = await uow.expenses.get_all(who_paid_id=user_id)
+                return [expense.to_read_schema() for expense in expenses]
 
         except RepositoryError as exc:
             logger.exception(exc)
@@ -76,7 +77,7 @@ class ExpenseService:
                 if expense is None:
                     await uow.rollback()
                     raise ExpenseServiceNotFoundError
-                return expense
+                return expense.to_read_schema()
 
         except RepositoryError as exc:
             logger.exception(exc)
@@ -113,7 +114,7 @@ class ExpenseService:
                     }
                 )
                 await uow.commit()
-                return created_expense
+                return created_expense.to_read_schema()
 
         except RepositoryIntegrityError as exc:
             logger.exception(exc)
@@ -155,7 +156,7 @@ class ExpenseService:
                     },
                 )
                 await uow.commit()
-                return updated_expense
+                return updated_expense.to_read_schema()
 
         except RepositoryDoesNotExistError as exc:
             raise ExpenseServiceNotFoundError from exc

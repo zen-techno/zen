@@ -7,7 +7,7 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models import Category, Expense, User
+from src.models import CategoryModel, ExpenseModel, UserModel
 from tests.fixtures.models import test_expenses
 
 API_PATH = "api/v1"
@@ -22,7 +22,7 @@ class TestExpenseAPI:
         assert response.json() == []
 
     async def test_get_all_expenses(
-        self, aclient: AsyncClient, create_expenses_fixture: list[Expense]
+        self, aclient: AsyncClient, create_expenses_fixture: list[ExpenseModel]
     ) -> None:
         response = await aclient.get(f"{API_PATH}/expenses")
 
@@ -33,7 +33,7 @@ class TestExpenseAPI:
         assert len(body) == len(create_expenses_fixture)
 
         assert body == jsonable_encoder(
-            [e.to_read_model() for e in create_expenses_fixture]
+            [e.to_dataclass() for e in create_expenses_fixture]
         )
 
     @pytest.mark.parametrize("expense", test_expenses)
@@ -41,7 +41,7 @@ class TestExpenseAPI:
         self,
         expense: dict[str, Any],
         aclient: AsyncClient,
-        create_expenses_fixture: list[Expense],
+        create_expenses_fixture: list[ExpenseModel],
     ) -> None:
         expense_uuid = str(expense["id"])
         response = await aclient.get(f"{API_PATH}/expenses/{expense_uuid}")
@@ -62,7 +62,7 @@ class TestExpenseAPI:
         assert body["category"]["id"] == str(expense["category_id"])
 
     async def test_expense_not_found(
-        self, aclient: AsyncClient, create_expenses_fixture: list[Expense]
+        self, aclient: AsyncClient, create_expenses_fixture: list[ExpenseModel]
     ) -> None:
         expense_uuid = "b781d250-ffff-ffff-ffff-dbee25e681bd"
         response = await aclient.get(f"{API_PATH}/expenses/{expense_uuid}")
@@ -76,8 +76,8 @@ class TestExpenseAPI:
         expense: dict[str, Any],
         aclient: AsyncClient,
         database_session: AsyncSession,
-        create_users_fixture: list[User],
-        create_categories_fixture: list[Category],
+        create_users_fixture: list[UserModel],
+        create_categories_fixture: list[CategoryModel],
     ) -> None:
         response = await aclient.post(
             f"{API_PATH}/expenses",
@@ -108,7 +108,7 @@ class TestExpenseAPI:
         assert created_who_paid_id == str(expense["who_paid_id"])
         assert created_category_id == str(expense["category_id"])
 
-        query = select(Expense).filter_by(id=created_expense_id)
+        query = select(ExpenseModel).filter_by(id=created_expense_id)
         result = await database_session.execute(query)
         result = result.scalar_one_or_none()
 
@@ -127,7 +127,7 @@ class TestExpenseAPI:
         self,
         expense: dict[str, Any],
         aclient: AsyncClient,
-        create_expenses_fixture: list[Expense],
+        create_expenses_fixture: list[ExpenseModel],
         database_session: AsyncSession,
     ) -> None:
         expense_uuid = str(expense["id"])
@@ -166,7 +166,7 @@ class TestExpenseAPI:
         assert updated_category_id == str(expense["category_id"])
 
         query = (
-            select(Expense)
+            select(ExpenseModel)
             .filter_by(id=updated_expense_id)
             .execution_options(populate_existing=True)
         )
@@ -188,7 +188,7 @@ class TestExpenseAPI:
         self,
         expense: dict[str, Any],
         aclient: AsyncClient,
-        create_expenses_fixture: list[Expense],
+        create_expenses_fixture: list[ExpenseModel],
         database_session: AsyncSession,
     ) -> None:
         expense_uuid = str(expense["id"])
@@ -197,7 +197,7 @@ class TestExpenseAPI:
         )
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-        query = select(Expense).filter_by(id=expense_uuid)
+        query = select(ExpenseModel).filter_by(id=expense_uuid)
         result = await database_session.execute(query)
         result = result.scalar_one_or_none()
 

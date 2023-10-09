@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tests.fixtures.database.database_metadata import Entity
+from tests.fixtures.database.database_metadata import EntityModel
 
 test_entities: list[dict[str, Any]] = [
     {
@@ -29,8 +29,8 @@ test_entities: list[dict[str, Any]] = [
 @pytest.fixture()
 async def create_entities_fixture(
     database_session: AsyncSession,
-) -> list[Entity]:
-    query = insert(Entity).values(test_entities).returning(Entity)
+) -> list[EntityModel]:
+    query = insert(EntityModel).values(test_entities).returning(EntityModel)
 
     result = await database_session.execute(query)
     result = result.scalars().all()

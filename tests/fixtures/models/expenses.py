@@ -7,7 +7,7 @@ from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.models import Category, Expense, User
+from src.models import CategoryModel, ExpenseModel, UserModel
 
 test_expenses: list[dict[str, Any]] = [
     {
@@ -31,16 +31,16 @@ test_expenses: list[dict[str, Any]] = [
 
 @pytest.fixture()
 async def create_expenses_fixture(
-    create_users_fixture: list[User],
-    create_categories_fixture: list[Category],
+    create_users_fixture: list[UserModel],
+    create_categories_fixture: list[CategoryModel],
     database_session: AsyncSession,
-) -> list[Expense]:
+) -> list[ExpenseModel]:
     query = (
-        insert(Expense)
+        insert(ExpenseModel)
         .values(test_expenses)
-        .returning(Expense)
-        .options(selectinload(Expense.who_paid))
-        .options(selectinload(Expense.category))
+        .returning(ExpenseModel)
+        .options(selectinload(ExpenseModel.who_paid))
+        .options(selectinload(ExpenseModel.category))
     )
     result = await database_session.execute(query)
     result = result.scalars().all()

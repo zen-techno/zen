@@ -3,8 +3,8 @@ from collections.abc import AsyncGenerator
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.database import async_session_maker, engine
 from src.settings import settings
+from src.storage.sqlalchemy import async_session_maker, engine
 from tests.fixtures.database.database_metadata import TestBase
 
 

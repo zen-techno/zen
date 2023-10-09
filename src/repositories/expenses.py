@@ -1,6 +1,6 @@
 from src.core.repository import SQLAlchemyRepository
-from src.models import Expense
+from src.models import ExpenseModel
 
 
 class ExpenseRepository(SQLAlchemyRepository):
-    model = Expense
+    model = ExpenseModel

@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends
 
 from src.core.unit_of_work import AbstractUnitOfWork, UnitOfWork
-from src.database import async_session_maker
+from src.storage.sqlalchemy import async_session_maker
 
 
 def get_unit_of_work() -> UnitOfWork:

@@ -7,7 +7,7 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models import Expense, User
+from src.models import ExpenseModel, UserModel
 from tests.fixtures.models import test_users
 
 API_PATH = "api/v1"
@@ -22,7 +22,7 @@ class TestUserAPI:
         assert response.json() == []
 
     async def test_get_all_users(
-        self, aclient: AsyncClient, create_users_fixture: list[User]
+        self, aclient: AsyncClient, create_users_fixture: list[UserModel]
     ) -> None:
         response = await aclient.get(f"{API_PATH}/users")
 
@@ -33,7 +33,7 @@ class TestUserAPI:
         assert len(body) == len(create_users_fixture)
 
         assert body == jsonable_encoder(
-            [u.to_read_model() for u in create_users_fixture]
+            [u.to_dataclass() for u in create_users_fixture]
         )
 
     @pytest.mark.parametrize("user", test_users)
@@ -41,7 +41,7 @@ class TestUserAPI:
         self,
         user: dict[str, Any],
         aclient: AsyncClient,
-        create_users_fixture: list[User],
+        create_users_fixture: list[UserModel],
     ) -> None:
         user_uuid = str(user["id"])
         response = await aclient.get(f"{API_PATH}/users/{user_uuid}")
@@ -57,7 +57,7 @@ class TestUserAPI:
         assert body["telegram_id"] == user["telegram_id"]
 
     async def test_user_not_found(
-        self, aclient: AsyncClient, create_users_fixture: list[User]
+        self, aclient: AsyncClient, create_users_fixture: list[UserModel]
     ) -> None:
         user_uuid = "b781d250-ffff-ffff-ffff-dbee25e681bd"
         response = await aclient.get(f"{API_PATH}/users/{user_uuid}")
@@ -90,7 +90,7 @@ class TestUserAPI:
         assert created_user_name == user["name"]
         assert created_user_telegram_id == user["telegram_id"]
 
-        query = select(User).filter_by(id=created_user_id)
+        query = select(UserModel).filter_by(id=created_user_id)
         result = await database_session.execute(query)
         result = result.scalar_one_or_none()
 
@@ -104,7 +104,7 @@ class TestUserAPI:
         self,
         user: dict[str, Any],
         aclient: AsyncClient,
-        create_users_fixture: list[User],
+        create_users_fixture: list[UserModel],
         database_session: AsyncSession,
     ) -> None:
         user_uuid = str(user["id"])
@@ -133,7 +133,7 @@ class TestUserAPI:
         assert updated_user_telegram_id == expected_telegram_id_update
 
         query = (
-            select(User)
+            select(UserModel)
             .filter_by(id=updated_user_id)
             .execution_options(populate_existing=True)
         )
@@ -150,7 +150,7 @@ class TestUserAPI:
         self,
         user: dict[str, Any],
         aclient: AsyncClient,
-        create_expenses_fixture: list[Expense],
+        create_expenses_fixture: list[ExpenseModel],
         database_session: AsyncSession,
     ) -> None:
         user_uuid = str(user["id"])
@@ -159,13 +159,13 @@ class TestUserAPI:
         )
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-        query = select(User).filter_by(id=user_uuid)
+        query = select(UserModel).filter_by(id=user_uuid)
         result = await database_session.execute(query)
         result = result.scalar_one_or_none()
 
         assert result is None
 
-        query = select(Expense).filter_by(who_paid_id=user_uuid)
+        query = select(ExpenseModel).filter_by(who_paid_id=user_uuid)
         result = await database_session.execute(query)
         result = list(result.scalars().all())
 

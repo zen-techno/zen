@@ -1,12 +1,12 @@
 from abc import abstractmethod
+from typing import Any
 
-from pydantic import BaseModel
 from sqlalchemy.orm import declarative_base
 
-DeclarativeBase = declarative_base()
+base = declarative_base()
 
 
-class Base(DeclarativeBase):
+class DeclarativeBase(base):
     __abstract__ = True
 
     @abstractmethod
@@ -14,5 +14,5 @@ class Base(DeclarativeBase):
         raise NotImplementedError
 
     @abstractmethod
-    def to_read_model(self) -> BaseModel:
+    def to_dataclass(self) -> Any:
         raise NotImplementedError

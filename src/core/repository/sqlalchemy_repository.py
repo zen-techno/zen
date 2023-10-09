@@ -4,16 +4,16 @@ from sqlalchemy import delete, insert, select, update
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.repository.exceptions import (
-    RepositoryDoesNotExistError,
-    RepositoryError,
-    RepositoryIntegrityError,
-)
 from src.core.repository.repository import (
     ID,
     AbstractRepository,
+    Entity,
     EntityDict,
-    EntityReadSchema,
+)
+from src.exceptions.repositories import (
+    RepositoryDoesNotExistError,
+    RepositoryError,
+    RepositoryIntegrityError,
 )
 
 
@@ -23,7 +23,7 @@ class SQLAlchemyRepository(AbstractRepository):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get_all(self, **filter_by: Any) -> list[EntityReadSchema]:
+    async def get_all(self, **filter_by: Any) -> list[Entity]:
         query = select(self.model).filter_by(**filter_by)
         try:
             result = await self.session.execute(query)
@@ -31,9 +31,9 @@ class SQLAlchemyRepository(AbstractRepository):
             await self.session.rollback()
             raise RepositoryError() from exc
 
-        return [item.to_read_model() for item in result.scalars()]
+        return [item.to_dataclass() for item in result.scalars()]
 
-    async def get_one(self, **filter_by: Any) -> EntityReadSchema | None:
+    async def get_one(self, **filter_by: Any) -> Entity | None:
         query = select(self.model).filter_by(**filter_by)
         try:
             result = await self.session.execute(query)
@@ -42,10 +42,10 @@ class SQLAlchemyRepository(AbstractRepository):
             raise RepositoryError() from exc
 
         if result := result.scalars().first():
-            return result.to_read_model()
+            return result.to_dataclass()
         return None
 
-    async def add_one(self, *, data: EntityDict) -> EntityReadSchema:
+    async def add_one(self, *, data: EntityDict) -> Entity:
         query = insert(self.model).values(**data).returning(self.model)
         try:
             result = await self.session.execute(query)
@@ -56,9 +56,9 @@ class SQLAlchemyRepository(AbstractRepository):
             await self.session.rollback()
             raise RepositoryError() from exc
 
-        return result.scalar_one().to_read_model()
+        return result.scalar_one().to_dataclass()
 
-    async def update_one(self, *, id: ID, data: EntityDict) -> EntityReadSchema:
+    async def update_one(self, *, id: ID, data: EntityDict) -> Entity:
         async with self.session.begin_nested():
             try:
                 existence_query = select(self.model.id).filter_by(id=id)
@@ -83,7 +83,7 @@ class SQLAlchemyRepository(AbstractRepository):
                 await self.session.rollback()
                 raise RepositoryError() from exc
 
-            return result.scalar_one().to_read_model()
+            return result.scalar_one().to_dataclass()
 
     async def delete_one(self, *, id: ID) -> None:
         async with self.session.begin_nested():

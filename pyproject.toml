@@ -14,6 +14,10 @@ alembic = "^1.12.0"
 pydantic-settings = "^2.0.3"
 asyncpg = "^0.28.0"
 pydantic = {extras = ["email"], version = "^2.4.1"}
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+redis = "^5.0.1"
+python-multipart = "^0.0.6"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"
@@ -70,7 +74,9 @@ ignore = [
     "F821",   # checks for uses of undefined names, breaks sqlalchemy models
     "UP007",  # large models are unreadable
     "ANN101", # removes type checking for self
-    "ANN401"  # allows type Any
+    "ANN102", # removes type checking for cls
+    "ANN401", # allows type Any
+    "RUF012"  # typing.ClassVar
 ]
 
 [tool.pytest.ini_options]
