@@ -5,12 +5,16 @@ from fastapi import FastAPI
 
 from src.api import router
 from src.api.middlewares import ErrorHandlingMiddleware
-from src.storage.sqlalchemy.utils import check_database_connection
+from src.storage.sqlalchemy.utils import (
+    check_database_connection,
+    create_superuser,
+)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await check_database_connection()
+    await create_superuser()
     yield
 
 

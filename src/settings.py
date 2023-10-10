@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import SecretStr
+from pydantic import EmailStr, SecretStr
 from pydantic.fields import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -33,6 +33,8 @@ class AuthSettings(BaseSettings):
     jwt_algorithm: str
     access_token_expire: int
     refresh_token_expire: int
+    superuser_email: EmailStr
+    superuser_password: SecretStr
 
     model_config = SettingsConfigDict(
         env_file=ENV_PATH, env_file_encoding="utf-8", env_prefix="AUTH_"
