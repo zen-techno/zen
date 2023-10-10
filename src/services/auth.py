@@ -13,9 +13,11 @@ from src.exceptions.repositories import (
     RepositoryIntegrityError,
 )
 from src.exceptions.services import (
+    AuthExpiredAccessToken,
+    AuthExpireRefreshToken,
+    AuthInvalidAccessToken,
+    AuthInvalidRefreshToken,
     AuthServiceBadRequest,
-    AuthServiceJWTError,
-    AuthServiceJWTExpiredSignature,
     ServiceBadRequestError,
     ServiceError,
     UserServiceNotFoundError,
@@ -168,13 +170,13 @@ class AuthService:
                 algorithms=settings.auth.jwt_algorithm,
             )
         except ExpiredSignatureError as exc:
-            raise AuthServiceJWTExpiredSignature from exc
+            raise AuthExpiredAccessToken from exc
         except JWTError as exc:
-            raise AuthServiceJWTError from exc
+            raise AuthInvalidAccessToken from exc
 
         user_id = payload.get("sub")
         if user_id is None:
-            raise AuthServiceJWTError
+            raise AuthInvalidAccessToken
         return UUID(user_id)
 
     @classmethod
@@ -194,11 +196,11 @@ class AuthService:
                 options={"verify_exp": False},
             )
         except JWTError as exc:
-            raise AuthServiceJWTError from exc
+            raise AuthInvalidAccessToken from exc
 
         user_id = access_payload.get("sub")
         if user_id is None:
-            raise AuthServiceJWTError
+            raise AuthInvalidAccessToken
 
         await cls.get_detail_user_by_id(uow=uow, user_id=user_id)
 
@@ -209,12 +211,12 @@ class AuthService:
                 access_token=access_token,
             )
         except ExpiredSignatureError as exc:
-            raise AuthServiceJWTExpiredSignature from exc
+            raise AuthExpireRefreshToken from exc
         except JWTError as exc:
-            raise AuthServiceJWTError from exc
+            raise AuthInvalidRefreshToken from exc
 
         redis_token = await redis.get(user_id)
         if redis_token != token:
-            raise AuthServiceJWTError
+            raise AuthInvalidRefreshToken
 
         return UUID(user_id)

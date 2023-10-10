@@ -55,5 +55,26 @@ class AuthServiceJWTError(BaseError):
     headers = {"WWW-Authenticate": "Bearer"}
 
 
-class AuthServiceJWTExpiredSignature(AuthServiceJWTError):
-    detail = "Expired signature"
+class AuthInvalidAccessToken(AuthServiceJWTError):
+    detail = "Invalid access token"
+
+
+class AuthInvalidRefreshToken(AuthServiceJWTError):
+    detail = "Invalid refresh token"
+
+
+class AuthExpiredAccessToken(AuthServiceJWTError):
+    detail = "Expired access token signature"
+
+
+class AuthExpireRefreshToken(AuthServiceJWTError):
+    detail = "Expired refresh token signature"
+
+
+class AuthPermissionDenied(BaseError):
+    detail = "Permission denied"
+    status_code = status.HTTP_403_FORBIDDEN
+
+
+class AuthUserNotActive(AuthPermissionDenied):
+    detail = "User not active"
