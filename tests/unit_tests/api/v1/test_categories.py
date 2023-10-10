@@ -7,7 +7,7 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models import Category
+from src.models import CategoryModel
 from tests.fixtures.models import test_categories
 
 API_PATH = "api/v1"
@@ -22,7 +22,9 @@ class TestCategoryAPI:
         assert response.json() == []
 
     async def test_get_all_categories(
-        self, aclient: AsyncClient, create_categories_fixture: list[Category]
+        self,
+        aclient: AsyncClient,
+        create_categories_fixture: list[CategoryModel],
     ) -> None:
         response = await aclient.get(f"{API_PATH}/categories")
 
@@ -32,7 +34,7 @@ class TestCategoryAPI:
         body = response.json()
         assert len(body) == len(create_categories_fixture)
         assert body == jsonable_encoder(
-            [c.to_read_model() for c in create_categories_fixture]
+            [c.to_dataclass() for c in create_categories_fixture]
         )
 
     @pytest.mark.parametrize("category", test_categories)
@@ -40,7 +42,7 @@ class TestCategoryAPI:
         self,
         category: dict[str, Any],
         aclient: AsyncClient,
-        create_categories_fixture: list[Category],
+        create_categories_fixture: list[CategoryModel],
     ) -> None:
         category_uuid = str(category["id"])
         response = await aclient.get(f"{API_PATH}/categories/{category_uuid}")
@@ -55,7 +57,9 @@ class TestCategoryAPI:
         assert body["name"] == category["name"]
 
     async def test_category_not_found(
-        self, aclient: AsyncClient, create_categories_fixture: list[Category]
+        self,
+        aclient: AsyncClient,
+        create_categories_fixture: list[CategoryModel],
     ) -> None:
         category_uuid = "b781d250-ffff-ffff-ffff-dbee25e681bd"
         response = await aclient.get(f"{API_PATH}/categories/{category_uuid}")
@@ -88,7 +92,7 @@ class TestCategoryAPI:
         assert created_category_id
         assert created_category_name == category["name"]
 
-        query = select(Category).filter_by(id=created_category_id)
+        query = select(CategoryModel).filter_by(id=created_category_id)
         result = await database_session.execute(query)
         result = result.scalar_one_or_none()
 
@@ -101,7 +105,7 @@ class TestCategoryAPI:
         self,
         category: dict[str, Any],
         aclient: AsyncClient,
-        create_categories_fixture: list[Category],
+        create_categories_fixture: list[CategoryModel],
         database_session: AsyncSession,
     ) -> None:
         category_uuid = str(category["id"])
@@ -124,7 +128,7 @@ class TestCategoryAPI:
         assert updated_category_name == expected_name_update
 
         query = (
-            select(Category)
+            select(CategoryModel)
             .filter_by(id=updated_category_id)
             .execution_options(populate_existing=True)
         )
@@ -140,7 +144,7 @@ class TestCategoryAPI:
         self,
         category: dict[str, Any],
         aclient: AsyncClient,
-        create_categories_fixture: list[Category],
+        create_categories_fixture: list[CategoryModel],
         database_session: AsyncSession,
     ) -> None:
         category_uuid = str(category["id"])
@@ -149,7 +153,7 @@ class TestCategoryAPI:
         )
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-        query = select(Category).filter_by(id=category_uuid)
+        query = select(CategoryModel).filter_by(id=category_uuid)
         result = await database_session.execute(query)
         result = result.scalar_one_or_none()
 

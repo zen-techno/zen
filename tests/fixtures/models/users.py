@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models import User
+from src.models import UserModel
 
 test_users: list[dict[str, Any]] = [
     {
@@ -22,8 +22,10 @@ test_users: list[dict[str, Any]] = [
 
 
 @pytest.fixture()
-async def create_users_fixture(database_session: AsyncSession) -> list[User]:
-    query = insert(User).values(test_users).returning(User)
+async def create_users_fixture(
+    database_session: AsyncSession,
+) -> list[UserModel]:
+    query = insert(UserModel).values(test_users).returning(UserModel)
 
     result = await database_session.execute(query)
     result = result.scalars().all()

@@ -4,7 +4,10 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tests.fixtures.database.database_metadata import Entity, EntityReadSchema
+from tests.fixtures.database.database_metadata import (
+    EntityModel,
+    EntityReadSchema,
+)
 from tests.fixtures.models import test_entities
 from tests.fixtures.unit_of_work import UnitOfWorkForTest
 
@@ -13,7 +16,7 @@ class TestSQLAlchemyRepository:
     async def test_get_all(
         self,
         uow: UnitOfWorkForTest,
-        create_entities_fixture: list[Entity],
+        create_entities_fixture: list[EntityModel],
     ) -> None:
         async with uow:
             entities = await uow.entities.get_all()
@@ -40,7 +43,7 @@ class TestSQLAlchemyRepository:
         self,
         entity: dict[str, Any],
         uow: UnitOfWorkForTest,
-        create_entities_fixture: list[Entity],
+        create_entities_fixture: list[EntityModel],
     ) -> None:
         async with uow:
             database_entity = await uow.entities.get_one(id=entity["id"])
@@ -52,7 +55,7 @@ class TestSQLAlchemyRepository:
     async def test_get_one_by_many_param(
         self,
         uow: UnitOfWorkForTest,
-        create_entities_fixture: list[Entity],
+        create_entities_fixture: list[EntityModel],
     ) -> None:
         params = {
             "username": test_entities[0]["username"],
@@ -68,7 +71,7 @@ class TestSQLAlchemyRepository:
     async def test_get_one_not_found(
         self,
         uow: UnitOfWorkForTest,
-        create_entities_fixture: list[Entity],
+        create_entities_fixture: list[EntityModel],
     ) -> None:
         params = {
             "username": "JackJack",
@@ -99,11 +102,11 @@ class TestSQLAlchemyRepository:
         assert created_entity.username == entity["username"]
         assert created_entity.balance == entity["balance"]
 
-        query = select(Entity).filter_by(id=created_entity.id)
+        query = select(EntityModel).filter_by(id=created_entity.id)
         result = await database_session.execute(query)
         result = result.scalar_one_or_none()
 
-        assert result.to_read_model() == created_entity
+        assert result.to_dataclass() == created_entity
 
     async def test_add_one_unique(
         self,
@@ -117,7 +120,7 @@ class TestSQLAlchemyRepository:
         entity: dict[str, Any],
         uow: UnitOfWorkForTest,
         database_session: AsyncSession,
-        create_entities_fixture: list[Entity],
+        create_entities_fixture: list[EntityModel],
     ) -> None:
         new_balance = 0
         async with uow:
@@ -133,7 +136,7 @@ class TestSQLAlchemyRepository:
         assert updated_entity.balance == new_balance
 
         query = (
-            select(Entity)
+            select(EntityModel)
             .filter_by(id=entity["id"])
             .execution_options(populate_existing=True)
         )
@@ -141,7 +144,7 @@ class TestSQLAlchemyRepository:
         result = await database_session.execute(query)
         result = result.scalar_one_or_none()
 
-        assert result.to_read_model() == updated_entity
+        assert result.to_dataclass() == updated_entity
 
     async def test_update_or_unique(
         self,
@@ -161,12 +164,12 @@ class TestSQLAlchemyRepository:
         entity: dict[str, Any],
         uow: UnitOfWorkForTest,
         database_session: AsyncSession,
-        create_entities_fixture: list[Entity],
+        create_entities_fixture: list[EntityModel],
     ) -> None:
         async with uow:
             await uow.entities.delete_one(id=entity["id"])
             await uow.commit()
-        query = select(Entity).filter_by(id=entity["id"])
+        query = select(EntityModel).filter_by(id=entity["id"])
 
         result = await database_session.execute(query)
         result = result.scalar_one_or_none()
