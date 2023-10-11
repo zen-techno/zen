@@ -20,10 +20,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 app = FastAPI(
     title="Zen",
-    summary="REST API сервис для управления личными финансами",
+    summary="REST API service for personal finance management",
     version="v1",
     lifespan=lifespan,
-    debug=True,
 )
 
 app.add_middleware(ErrorHandlingMiddleware)

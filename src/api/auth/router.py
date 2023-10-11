@@ -70,15 +70,3 @@ async def refresh_user_tokens(
     uow: UnitOfWorkDepends, redis: RedisDepends, tokens: TokensSchema
 ) -> TokensSchema:
     return await AuthService.refresh_tokens(uow=uow, redis=redis, tokens=tokens)
-
-
-@router.get(
-    "/me",
-    response_model=UserDetailReadSchema,
-    status_code=status.HTTP_200_OK,
-    summary="Get current user",
-)
-async def get_current_user(
-    user: UserDetailReadSchema = Depends(get_current_user),
-) -> UserDetailReadSchema:
-    return user

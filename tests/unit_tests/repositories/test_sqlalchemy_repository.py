@@ -108,12 +108,6 @@ class TestSQLAlchemyRepository:
 
         assert result.to_dataclass() == created_entity
 
-    async def test_add_one_unique(
-        self,
-        uow: UnitOfWorkForTest,
-    ) -> None:
-        raise NotImplementedError
-
     @pytest.mark.parametrize("entity", test_entities)
     async def test_update_one(
         self,
@@ -146,18 +140,6 @@ class TestSQLAlchemyRepository:
 
         assert result.to_dataclass() == updated_entity
 
-    async def test_update_or_unique(
-        self,
-        uow: UnitOfWorkForTest,
-    ) -> None:
-        raise NotImplementedError
-
-    async def test_update_not_found(
-        self,
-        uow: UnitOfWorkForTest,
-    ) -> None:
-        raise NotImplementedError
-
     @pytest.mark.parametrize("entity", test_entities)
     async def test_delete_one(
         self,
@@ -175,9 +157,3 @@ class TestSQLAlchemyRepository:
         result = result.scalar_one_or_none()
 
         assert result is None
-
-    async def test_delete_not_found(
-        self,
-        uow: UnitOfWorkForTest,
-    ) -> None:
-        raise NotImplementedError

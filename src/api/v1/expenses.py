@@ -1,8 +1,8 @@
 from uuid import UUID
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, status
 
-from src.api.dependencies import UnitOfWorkDepends
+from src.api.dependencies import UnitOfWorkDepends, get_owner_user
 from src.schemas.expenses import (
     ExpenseCreateSchema,
     ExpenseReadSchema,
@@ -13,6 +13,7 @@ from src.services import ExpenseService
 router = APIRouter(
     prefix="/users/{user_id}/categories/{category_id}/expenses",
     tags=["Expenses"],
+    dependencies=[Depends(get_owner_user)],
 )
 
 

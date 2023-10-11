@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 
@@ -29,5 +31,14 @@ async def get_superuser(
     user: UserDetailReadSchema = Depends(get_active_user),
 ) -> UserDetailReadSchema:
     if not user.is_superuser:
+        raise AuthPermissionDenied
+    return user
+
+
+async def get_owner_user(
+    user_id: UUID,
+    user: UserDetailReadSchema = Depends(get_active_user),
+) -> UserDetailReadSchema:
+    if user_id != user.id and not user.is_superuser:
         raise AuthPermissionDenied
     return user

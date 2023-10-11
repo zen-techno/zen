@@ -1,8 +1,8 @@
 from uuid import UUID
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, status
 
-from src.api.dependencies import UnitOfWorkDepends
+from src.api.dependencies import UnitOfWorkDepends, get_owner_user
 from src.schemas.categories import (
     CategoryCreateSchema,
     CategoryReadSchema,
@@ -10,7 +10,11 @@ from src.schemas.categories import (
 )
 from src.services import CategoryService
 
-router = APIRouter(prefix="/users/{user_id}/categories", tags=["Category"])
+router = APIRouter(
+    prefix="/users/{user_id}/categories",
+    tags=["Category"],
+    dependencies=[Depends(get_owner_user)],
+)
 
 
 @router.get(
